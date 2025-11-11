@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Biblical Timeline Explorer | מחקר ציר הזמן המקראי</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/timeline.css">
+    <link rel="stylesheet" href="css/responsive.css">
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="logo">
+                <h1 data-en="Biblical Timeline" data-he="ציר הזמן המקראי">Biblical Timeline</h1>
+            </div>
+
+            <div class="nav-menu">
+                <button class="nav-btn active" data-page="timeline" data-en="Timeline" data-he="ציר זמן">Timeline</button>
+                <button class="nav-btn" data-page="maps" data-en="Maps" data-he="מפות">Maps</button>
+                <button class="nav-btn" data-page="learn" data-en="Learn" data-he="למד">Learn</button>
+                <button class="nav-btn" data-page="quiz" data-en="Quiz" data-he="חידון">Quiz</button>
+                <button class="nav-btn" data-page="favorites" data-en="Favorites" data-he="מועדפים">Favorites</button>
+            </div>
+
+            <div class="nav-controls">
+                <div class="search-box">
+                    <input type="text" id="searchInput" placeholder="Search..." data-placeholder-en="Search..." data-placeholder-he="חפש...">
+                    <button id="searchBtn">🔍</button>
+                </div>
+
+                <button class="lang-toggle" id="langToggle">
+                    <span class="lang-option active" data-lang="en">EN</span>
+                    <span class="lang-divider">|</span>
+                    <span class="lang-option" data-lang="he">עב</span>
+                </button>
+
+                <div class="user-progress">
+                    <span data-en="Progress:" data-he=":התקדמות">Progress:</span>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progressFill"></div>
+                    </div>
+                    <span id="progressPercent">0%</span>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content Area -->
+    <main class="main-content">
+
+        <!-- Timeline Page -->
+        <section id="timeline-page" class="page active">
+            <div class="timeline-controls">
+                <div class="period-filters">
+                    <button class="period-btn active" data-period="all" data-en="All Periods" data-he="כל התקופות">All Periods</button>
+                    <button class="period-btn" data-period="creation" data-en="Creation" data-he="הבריאה">Creation</button>
+                    <button class="period-btn" data-period="patriarchs" data-en="Patriarchs" data-he="האבות">Patriarchs</button>
+                    <button class="period-btn" data-period="exodus" data-en="Exodus" data-he="יציאת מצרים">Exodus</button>
+                    <button class="period-btn" data-period="judges" data-en="Judges" data-he="שופטים">Judges</button>
+                    <button class="period-btn" data-period="kings" data-en="Kings" data-he="מלכים">Kings</button>
+                    <button class="period-btn" data-period="exile" data-en="Exile" data-he="גלות">Exile</button>
+                    <button class="period-btn" data-period="return" data-en="Return" data-he="שיבת ציון">Return</button>
+                </div>
+
+                <div class="zoom-controls">
+                    <button id="zoomOut">➖</button>
+                    <span id="zoomLevel">100%</span>
+                    <button id="zoomIn">➕</button>
+                    <button id="resetView" data-en="Reset View" data-he="איפוס תצוגה">Reset View</button>
+                </div>
+            </div>
+
+            <div class="timeline-container" id="timelineContainer">
+                <canvas id="timelineCanvas"></canvas>
+                <div class="timeline-overlay" id="timelineOverlay"></div>
+            </div>
+
+            <div class="timeline-legend">
+                <h3 data-en="Timeline Legend" data-he="מקרא">Timeline Legend</h3>
+                <div class="legend-items" id="legendItems"></div>
+            </div>
+        </section>
+
+        <!-- Maps Page -->
+        <section id="maps-page" class="page">
+            <div class="maps-sidebar">
+                <h2 data-en="Biblical Geography" data-he="גיאוגרפיה מקראית">Biblical Geography</h2>
+                <div class="map-filters">
+                    <button class="map-btn active" data-map="overview" data-en="Overview" data-he="סקירה">Overview</button>
+                    <button class="map-btn" data-map="exodus" data-en="Exodus Route" data-he="מסלול יציאת מצרים">Exodus Route</button>
+                    <button class="map-btn" data-map="kingdoms" data-en="Divided Kingdom" data-he="הממלכה המפולגת">Divided Kingdom</button>
+                    <button class="map-btn" data-map="jerusalem" data-en="Jerusalem" data-he="ירושלים">Jerusalem</button>
+                    <button class="map-btn" data-map="tabernacle" data-en="Tabernacle" data-he="המשכן">Tabernacle</button>
+                    <button class="map-btn" data-map="temple" data-en="Temple" data-he="בית המקדש">Temple</button>
+                </div>
+            </div>
+
+            <div class="map-viewer">
+                <div class="map-container" id="mapContainer">
+                    <img id="mapImage" src="" alt="Biblical Map">
+                    <div class="map-markers" id="mapMarkers"></div>
+                </div>
+                <div class="map-info" id="mapInfo">
+                    <h3 data-en="Click on locations to learn more" data-he="לחץ על מיקומים כדי ללמוד עוד">Click on locations to learn more</h3>
+                </div>
+            </div>
+        </section>
+
+        <!-- Learn Page -->
+        <section id="learn-page" class="page">
+            <div class="learn-sidebar">
+                <h2 data-en="Topics" data-he="נושאים">Topics</h2>
+                <div class="topic-list" id="topicList">
+                    <button class="topic-btn" data-topic="clothing" data-en="Biblical Clothing" data-he="לבוש מקראי">Biblical Clothing</button>
+                    <button class="topic-btn" data-topic="tools" data-en="Tools & Implements" data-he="כלים וציוד">Tools & Implements</button>
+                    <button class="topic-btn" data-topic="customs" data-en="Customs & Culture" data-he="מנהגים ותרבות">Customs & Culture</button>
+                    <button class="topic-btn" data-topic="people" data-en="Key Figures" data-he="דמויות מרכזיות">Key Figures</button>
+                    <button class="topic-btn" data-topic="events" data-en="Major Events" data-he="אירועים מרכזיים">Major Events</button>
+                    <button class="topic-btn" data-topic="architecture" data-en="Architecture" data-he="אדריכלות">Architecture</button>
+                </div>
+            </div>
+
+            <div class="learn-content" id="learnContent">
+                <h2 data-en="Select a topic to begin learning" data-he="בחר נושא כדי להתחיל ללמוד">Select a topic to begin learning</h2>
+            </div>
+        </section>
+
+        <!-- Quiz Page -->
+        <section id="quiz-page" class="page">
+            <div class="quiz-container">
+                <div class="quiz-header">
+                    <h2 data-en="Test Your Knowledge" data-he="בחן את הידע שלך">Test Your Knowledge</h2>
+                    <div class="quiz-score">
+                        <span data-en="Score:" data-he=":ניקוד">Score:</span>
+                        <span id="quizScore">0</span>
+                    </div>
+                </div>
+
+                <div class="quiz-difficulty">
+                    <button class="difficulty-btn active" data-difficulty="easy" data-en="Easy" data-he="קל">Easy</button>
+                    <button class="difficulty-btn" data-difficulty="medium" data-en="Medium" data-he="בינוני">Medium</button>
+                    <button class="difficulty-btn" data-difficulty="hard" data-en="Hard" data-he="קשה">Hard</button>
+                </div>
+
+                <div class="quiz-content" id="quizContent">
+                    <button class="start-quiz-btn" id="startQuiz" data-en="Start Quiz" data-he="התחל חידון">Start Quiz</button>
+                </div>
+
+                <div class="quiz-stats" id="quizStats"></div>
+            </div>
+        </section>
+
+        <!-- Favorites Page -->
+        <section id="favorites-page" class="page">
+            <h2 data-en="Your Bookmarks & Favorites" data-he="הסימניות והמועדפים שלך">Your Bookmarks & Favorites</h2>
+            <div class="favorites-container" id="favoritesContainer">
+                <p class="empty-state" data-en="No favorites yet. Click the ⭐ icon on any item to bookmark it!" data-he="אין מועדפים עדיין. לחץ על אייקון ⭐ על כל פריט כדי לסמן אותו!">No favorites yet. Click the ⭐ icon on any item to bookmark it!</p>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Modal for detailed information -->
+    <div class="modal" id="detailModal">
+        <div class="modal-content">
+            <button class="modal-close" id="modalClose">✕</button>
+            <button class="modal-favorite" id="modalFavorite">⭐</button>
+            <div class="modal-body" id="modalBody"></div>
+        </div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loader"></div>
+        <p data-en="Loading..." data-he="...טוען">Loading...</p>
+    </div>
+
+    <!-- Scripts -->
+    <script src="js/data.js"></script>
+    <script src="js/language.js"></script>
+    <script src="js/timeline.js"></script>
+    <script src="js/maps.js"></script>
+    <script src="js/learn.js"></script>
+    <script src="js/quiz.js"></script>
+    <script src="js/favorites.js"></script>
+    <script src="js/search.js"></script>
+    <script src="js/progress.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>

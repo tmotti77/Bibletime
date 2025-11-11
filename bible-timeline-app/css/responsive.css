@@ -1,0 +1,344 @@
+/* ============================================
+   RESPONSIVE DESIGN
+   Mobile-First Approach
+   ============================================ */
+
+/* Tablet Styles (768px - 1024px) */
+@media (max-width: 1024px) {
+    .nav-container {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .nav-menu {
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    .nav-controls {
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    .timeline-controls {
+        flex-direction: column;
+    }
+
+    .period-filters {
+        justify-content: center;
+    }
+
+    .zoom-controls {
+        justify-content: center;
+    }
+
+    #maps-page,
+    #learn-page {
+        flex-direction: column;
+    }
+
+    .maps-sidebar,
+    .learn-sidebar {
+        width: 100%;
+    }
+
+    .timeline-grid {
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    }
+}
+
+/* Mobile Styles (up to 767px) */
+@media (max-width: 767px) {
+    :root {
+        --spacing-xl: 1.5rem;
+        --spacing-lg: 1rem;
+    }
+
+    .logo h1 {
+        font-size: 1.3rem;
+    }
+
+    .nav-btn {
+        font-size: 0.85rem;
+        padding: var(--spacing-xs) var(--spacing-sm);
+    }
+
+    .search-box input {
+        width: 150px;
+        font-size: 0.85rem;
+    }
+
+    .user-progress {
+        width: 100%;
+        justify-content: center;
+        margin-top: var(--spacing-sm);
+    }
+
+    .progress-bar {
+        width: 150px;
+    }
+
+    .main-content {
+        padding: 0 var(--spacing-sm);
+        margin: var(--spacing-md) auto;
+    }
+
+    .timeline-controls {
+        padding: var(--spacing-md);
+    }
+
+    .period-filters {
+        gap: var(--spacing-xs);
+    }
+
+    .period-btn {
+        font-size: 0.8rem;
+        padding: var(--spacing-xs) var(--spacing-sm);
+    }
+
+    .zoom-controls {
+        flex-wrap: wrap;
+    }
+
+    .timeline-container {
+        min-height: 400px;
+    }
+
+    .timeline-legend {
+        padding: var(--spacing-md);
+    }
+
+    .legend-items {
+        grid-template-columns: 1fr;
+    }
+
+    .maps-sidebar,
+    .learn-sidebar {
+        padding: var(--spacing-md);
+    }
+
+    .map-container {
+        min-height: 400px;
+    }
+
+    .learn-content {
+        padding: var(--spacing-md);
+        min-height: 400px;
+    }
+
+    .quiz-container {
+        padding: var(--spacing-md);
+    }
+
+    .quiz-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: var(--spacing-sm);
+    }
+
+    .quiz-header h2 {
+        font-size: 1.4rem;
+    }
+
+    .quiz-difficulty {
+        flex-direction: column;
+        width: 100%;
+    }
+
+    .difficulty-btn {
+        width: 100%;
+    }
+
+    .modal-content {
+        max-width: 95%;
+        margin: var(--spacing-md);
+        padding: var(--spacing-md);
+    }
+
+    .modal-close {
+        top: var(--spacing-sm);
+        right: var(--spacing-sm);
+        width: 32px;
+        height: 32px;
+        font-size: 1.2rem;
+    }
+
+    .modal-favorite {
+        right: 50px;
+        width: 32px;
+        height: 32px;
+        font-size: 1.1rem;
+    }
+
+    .timeline-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .timeline-vertical {
+        padding-left: 30px;
+    }
+
+    .timeline-vertical::before {
+        left: 10px;
+    }
+
+    .timeline-vertical .event-card::before {
+        left: -28px;
+    }
+
+    .event-card {
+        padding: var(--spacing-sm);
+    }
+
+    .event-card h4 {
+        font-size: 1rem;
+    }
+
+    /* Touch-friendly sizing */
+    button {
+        min-height: 44px;
+        min-width: 44px;
+    }
+
+    .map-marker,
+    .timeline-marker {
+        width: 32px;
+        height: 32px;
+    }
+}
+
+/* Extra Small Mobile (up to 480px) */
+@media (max-width: 480px) {
+    .logo h1 {
+        font-size: 1.1rem;
+    }
+
+    .nav-menu {
+        gap: var(--spacing-xs);
+    }
+
+    .nav-btn {
+        flex: 1;
+        min-width: 70px;
+        padding: var(--spacing-xs);
+    }
+
+    .search-box input {
+        width: 100px;
+    }
+
+    .lang-toggle {
+        padding: var(--spacing-xs) var(--spacing-sm);
+    }
+
+    .quiz-header h2 {
+        font-size: 1.2rem;
+    }
+
+    .learn-content h2 {
+        font-size: 1.4rem;
+    }
+
+    .timeline-legend h3 {
+        font-size: 1.1rem;
+    }
+
+    .start-quiz-btn {
+        font-size: 1rem;
+        padding: var(--spacing-md);
+    }
+}
+
+/* Landscape Mobile */
+@media (max-height: 500px) and (orientation: landscape) {
+    .timeline-container,
+    .map-container,
+    .learn-content {
+        min-height: 300px;
+    }
+
+    .modal-content {
+        max-height: 85vh;
+    }
+}
+
+/* High DPI Displays */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+    .timeline-marker,
+    .map-marker {
+        border-width: 2px;
+    }
+
+    .timeline-line {
+        stroke-width: 2;
+    }
+
+    .timeline-line.major {
+        stroke-width: 4;
+    }
+}
+
+/* Print Styles */
+@media print {
+    .navbar,
+    .timeline-controls,
+    .zoom-controls,
+    .nav-controls,
+    .modal-close,
+    .modal-favorite {
+        display: none !important;
+    }
+
+    .main-content {
+        max-width: 100%;
+    }
+
+    .page {
+        display: block !important;
+        page-break-after: always;
+    }
+
+    body {
+        background: white;
+    }
+
+    .timeline-container,
+    .map-container,
+    .learn-content,
+    .quiz-container,
+    .favorites-container {
+        border: 2px solid #000;
+        box-shadow: none;
+    }
+}
+
+/* Dark Mode Support (optional) */
+@media (prefers-color-scheme: dark) {
+    /* Can be implemented if desired */
+}
+
+/* Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+
+/* High Contrast Mode */
+@media (prefers-contrast: high) {
+    :root {
+        --shadow: rgba(0, 0, 0, 0.5);
+    }
+
+    button,
+    .nav-btn,
+    .period-btn,
+    .map-btn,
+    .topic-btn {
+        border-width: 3px;
+    }
+}

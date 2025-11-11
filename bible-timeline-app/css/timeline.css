@@ -1,0 +1,293 @@
+/* ============================================
+   TIMELINE SPECIFIC STYLES
+   ============================================ */
+
+.timeline-item {
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.timeline-item:hover {
+    opacity: 0.8;
+    transform: scale(1.02);
+}
+
+.timeline-marker {
+    position: absolute;
+    background: var(--vintage-burgundy);
+    border: 3px solid var(--vintage-gold);
+    border-radius: 50%;
+    cursor: pointer;
+    transition: all 0.3s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: bold;
+    box-shadow: 0 2px 8px var(--shadow);
+}
+
+.timeline-marker:hover {
+    transform: scale(1.3);
+    z-index: 10;
+    box-shadow: 0 4px 16px var(--shadow);
+}
+
+.timeline-marker.major-event {
+    background: var(--vintage-navy);
+    border-width: 4px;
+}
+
+.timeline-marker.person {
+    background: var(--vintage-olive);
+    border-radius: 5px;
+}
+
+.timeline-period {
+    position: absolute;
+    background: rgba(107, 44, 44, 0.1);
+    border: 2px solid var(--vintage-burgundy);
+    border-radius: 4px;
+    padding: var(--spacing-sm);
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.timeline-period:hover {
+    background: rgba(107, 44, 44, 0.2);
+    border-width: 3px;
+}
+
+.timeline-period-label {
+    font-family: var(--font-display);
+    font-weight: bold;
+    color: var(--vintage-dark);
+    font-size: 0.9rem;
+    text-align: center;
+}
+
+.timeline-line {
+    stroke: var(--vintage-brown);
+    stroke-width: 3;
+}
+
+.timeline-line.major {
+    stroke: var(--vintage-navy);
+    stroke-width: 5;
+}
+
+.timeline-era {
+    fill: rgba(212, 197, 169, 0.3);
+    stroke: var(--vintage-brown);
+    stroke-width: 2;
+}
+
+.timeline-tooltip {
+    position: absolute;
+    background: var(--vintage-cream);
+    border: 3px solid var(--vintage-gold);
+    border-radius: 6px;
+    padding: var(--spacing-sm) var(--spacing-md);
+    pointer-events: none;
+    z-index: 1000;
+    box-shadow: 0 4px 12px var(--shadow);
+    font-size: 0.85rem;
+    max-width: 250px;
+    opacity: 0;
+    transition: opacity 0.2s;
+}
+
+.timeline-tooltip.visible {
+    opacity: 1;
+}
+
+.timeline-tooltip h4 {
+    font-family: var(--font-display);
+    color: var(--vintage-burgundy);
+    margin-bottom: var(--spacing-xs);
+    font-size: 1rem;
+}
+
+.timeline-tooltip p {
+    color: var(--text-secondary);
+    margin: 0;
+    font-size: 0.8rem;
+}
+
+/* Timeline Zoom Levels */
+.timeline-container.zoom-50 {
+    transform: scale(0.5);
+    transform-origin: top left;
+}
+
+.timeline-container.zoom-75 {
+    transform: scale(0.75);
+    transform-origin: top left;
+}
+
+.timeline-container.zoom-150 {
+    transform: scale(1.5);
+    transform-origin: top left;
+}
+
+.timeline-container.zoom-200 {
+    transform: scale(2);
+    transform-origin: top left;
+}
+
+/* Timeline Categories */
+.category-creation {
+    fill: #8b7355;
+}
+
+.category-patriarchs {
+    fill: #6b7c3b;
+}
+
+.category-exodus {
+    fill: #6b2c2c;
+}
+
+.category-judges {
+    fill: #b8860b;
+}
+
+.category-kings {
+    fill: #2c3e50;
+}
+
+.category-exile {
+    fill: #5c5244;
+}
+
+.category-return {
+    fill: #3ba99c;
+}
+
+/* Event Cards in Timeline */
+.event-card {
+    background: white;
+    border: 2px solid var(--border-color);
+    border-left: 4px solid var(--vintage-burgundy);
+    border-radius: 4px;
+    padding: var(--spacing-md);
+    margin-bottom: var(--spacing-sm);
+    cursor: pointer;
+    transition: all 0.3s;
+    box-shadow: 0 2px 6px var(--shadow);
+}
+
+.event-card:hover {
+    border-left-width: 8px;
+    transform: translateX(5px);
+    box-shadow: 0 4px 12px var(--shadow);
+}
+
+.event-card h4 {
+    font-family: var(--font-display);
+    color: var(--vintage-burgundy);
+    margin-bottom: var(--spacing-xs);
+    font-size: 1.1rem;
+}
+
+.event-card .event-date {
+    color: var(--vintage-gold);
+    font-weight: bold;
+    font-size: 0.85rem;
+    margin-bottom: var(--spacing-xs);
+}
+
+.event-card .event-description {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    line-height: 1.5;
+}
+
+.event-card .event-tags {
+    margin-top: var(--spacing-sm);
+    display: flex;
+    gap: var(--spacing-xs);
+    flex-wrap: wrap;
+}
+
+.event-tag {
+    background: var(--vintage-tan);
+    color: var(--vintage-dark);
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 500;
+}
+
+/* Timeline Grid */
+.timeline-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: var(--spacing-md);
+    margin-top: var(--spacing-lg);
+}
+
+/* Vertical Timeline View */
+.timeline-vertical {
+    position: relative;
+    padding-left: 50px;
+}
+
+.timeline-vertical::before {
+    content: '';
+    position: absolute;
+    left: 20px;
+    top: 0;
+    bottom: 0;
+    width: 4px;
+    background: var(--vintage-gold);
+}
+
+.timeline-vertical .event-card {
+    position: relative;
+    margin-left: var(--spacing-lg);
+}
+
+.timeline-vertical .event-card::before {
+    content: '';
+    position: absolute;
+    left: -38px;
+    top: 20px;
+    width: 16px;
+    height: 16px;
+    background: var(--vintage-burgundy);
+    border: 3px solid var(--vintage-gold);
+    border-radius: 50%;
+}
+
+/* Horizontal Scroll Timeline */
+.timeline-horizontal {
+    display: flex;
+    gap: var(--spacing-lg);
+    overflow-x: auto;
+    padding: var(--spacing-lg) 0;
+    scroll-behavior: smooth;
+}
+
+.timeline-horizontal::-webkit-scrollbar {
+    height: 10px;
+}
+
+.timeline-horizontal::-webkit-scrollbar-track {
+    background: var(--vintage-tan);
+    border-radius: 5px;
+}
+
+.timeline-horizontal::-webkit-scrollbar-thumb {
+    background: var(--vintage-burgundy);
+    border-radius: 5px;
+}
+
+.timeline-horizontal::-webkit-scrollbar-thumb:hover {
+    background: var(--vintage-navy);
+}
+
+.timeline-horizontal .event-card {
+    min-width: 300px;
+    flex-shrink: 0;
+}
