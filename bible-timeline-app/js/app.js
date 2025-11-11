@@ -90,14 +90,14 @@ class App {
         // Perform any page-specific setup
         switch (pageName) {
             case 'timeline':
-                if (window.timelineManager) {
-                    window.timelineManager.renderTimeline();
+                if (window.chartTimelineManager) {
+                    window.chartTimelineManager.createHotspots();
                 }
                 break;
 
-            case 'maps':
-                if (window.mapsManager) {
-                    // Maps manager handles its own initialization
+            case 'characters':
+                if (window.charactersManager) {
+                    window.charactersManager.renderCharacters();
                 }
                 break;
 
