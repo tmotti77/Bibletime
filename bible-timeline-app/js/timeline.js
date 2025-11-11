@@ -1,19 +1,20 @@
-// Interactive Timeline Component with Zoom/Pan
+// Timeline Visualization - Recreates the biblical chart style with horizontal bars and interactive elements
 
-class TimelineManager {
+class InteractiveTimelineManager {
     constructor() {
-        this.canvas = document.getElementById('timelineCanvas');
-        this.overlay = document.getElementById('timelineOverlay');
         this.container = document.getElementById('timelineContainer');
+        this.canvas = document.getElementById('timelineCanvas');
         this.ctx = null;
         this.zoomLevel = 1;
-        this.panX = 0;
-        this.panY = 0;
+        this.scrollX = 0;
         this.isDragging = false;
         this.lastMouseX = 0;
-        this.lastMouseY = 0;
-        this.currentFilter = 'all';
-        this.hoveredItem = null;
+
+        // Timeline configuration
+        this.startYear = -4004;
+        this.endYear = -400;
+        this.yearRange = Math.abs(this.endYear - this.startYear);
+        this.pixelsPerYear = 0.5; // Will be adjusted based on zoom
 
         if (this.canvas) {
             this.init();
@@ -21,210 +22,343 @@ class TimelineManager {
     }
 
     init() {
-        this.ctx = this.canvas.getContext('2d');
         this.setupCanvas();
         this.setupEventListeners();
-        this.renderTimeline();
-        this.setupLegend();
+        this.render();
     }
 
     setupCanvas() {
         const rect = this.container.getBoundingClientRect();
-        this.canvas.width = rect.width;
-        this.canvas.height = 600;
+        this.canvas.width = this.yearRange * this.pixelsPerYear * this.zoomLevel;
+        this.canvas.height = 800;
+        this.ctx = this.canvas.getContext('2d');
     }
 
     setupEventListeners() {
         // Zoom controls
-        document.getElementById('zoomIn')?.addEventListener('click', () => this.zoom(1.2));
-        document.getElementById('zoomOut')?.addEventListener('click', () => this.zoom(0.8));
-        document.getElementById('resetView')?.addEventListener('click', () => this.resetView());
-
-        // Period filters
-        document.querySelectorAll('.period-btn').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                document.querySelectorAll('.period-btn').forEach(b => b.classList.remove('active'));
-                e.target.classList.add('active');
-                this.currentFilter = e.target.getAttribute('data-period');
-                this.renderTimeline();
-            });
+        document.getElementById('zoomIn')?.addEventListener('click', () => {
+            this.zoomLevel *= 1.3;
+            this.setupCanvas();
+            this.render();
+            this.updateZoomDisplay();
         });
 
-        // Mouse events for pan
-        this.canvas.addEventListener('mousedown', (e) => this.startDrag(e));
-        this.canvas.addEventListener('mousemove', (e) => this.drag(e));
-        this.canvas.addEventListener('mouseup', () => this.endDrag());
-        this.canvas.addEventListener('mouseleave', () => this.endDrag());
-
-        // Mouse move for hover effects
-        this.canvas.addEventListener('mousemove', (e) => this.handleHover(e));
-        this.canvas.addEventListener('click', (e) => this.handleClick(e));
-
-        // Touch events for mobile
-        this.canvas.addEventListener('touchstart', (e) => this.handleTouchStart(e));
-        this.canvas.addEventListener('touchmove', (e) => this.handleTouchMove(e));
-        this.canvas.addEventListener('touchend', () => this.endDrag());
-
-        // Window resize
-        window.addEventListener('resize', () => {
+        document.getElementById('zoomOut')?.addEventListener('click', () => {
+            this.zoomLevel /= 1.3;
+            this.zoomLevel = Math.max(0.3, this.zoomLevel);
             this.setupCanvas();
-            this.renderTimeline();
+            this.render();
+            this.updateZoomDisplay();
+        });
+
+        document.getElementById('resetView')?.addEventListener('click', () => {
+            this.zoomLevel = 1;
+            this.scrollX = 0;
+            this.container.scrollLeft = 0;
+            this.setupCanvas();
+            this.render();
+            this.updateZoomDisplay();
+        });
+
+        // Pan with mouse
+        this.container.addEventListener('mousedown', (e) => {
+            this.isDragging = true;
+            this.lastMouseX = e.clientX;
+        });
+
+        this.container.addEventListener('mousemove', (e) => {
+            if (this.isDragging) {
+                const deltaX = e.clientX - this.lastMouseX;
+                this.container.scrollLeft -= deltaX;
+                this.lastMouseX = e.clientX;
+            }
+        });
+
+        this.container.addEventListener('mouseup', () => {
+            this.isDragging = false;
+        });
+
+        this.container.addEventListener('mouseleave', () => {
+            this.isDragging = false;
+        });
+
+        // Click on events
+        this.canvas.addEventListener('click', (e) => {
+            this.handleClick(e);
         });
 
         // Language change
         window.addEventListener('languageChange', () => {
-            this.renderTimeline();
-            this.setupLegend();
+            this.render();
+        });
+
+        // Resize
+        window.addEventListener('resize', () => {
+            this.setupCanvas();
+            this.render();
         });
     }
 
-    zoom(factor) {
-        this.zoomLevel *= factor;
-        this.zoomLevel = Math.max(0.5, Math.min(3, this.zoomLevel)); // Limit zoom 0.5x to 3x
-        this.updateZoomDisplay();
-        this.renderTimeline();
-    }
-
-    resetView() {
-        this.zoomLevel = 1;
-        this.panX = 0;
-        this.panY = 0;
-        this.updateZoomDisplay();
-        this.renderTimeline();
-    }
-
     updateZoomDisplay() {
-        const zoomDisplay = document.getElementById('zoomLevel');
-        if (zoomDisplay) {
-            zoomDisplay.textContent = Math.round(this.zoomLevel * 100) + '%';
+        const display = document.getElementById('zoomLevel');
+        if (display) {
+            display.textContent = Math.round(this.zoomLevel * 100) + '%';
         }
     }
 
-    startDrag(e) {
-        this.isDragging = true;
-        this.lastMouseX = e.clientX;
-        this.lastMouseY = e.clientY;
+    yearToX(year) {
+        return (Math.abs(year - this.startYear)) * this.pixelsPerYear * this.zoomLevel;
     }
 
-    drag(e) {
-        if (!this.isDragging) return;
+    render() {
+        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
-        const deltaX = e.clientX - this.lastMouseX;
-        const deltaY = e.clientY - this.lastMouseY;
+        // Draw vintage paper background
+        this.drawBackground();
 
-        this.panX += deltaX;
-        this.panY += deltaY;
+        // Draw main timeline
+        this.drawMainTimeline();
 
-        this.lastMouseX = e.clientX;
-        this.lastMouseY = e.clientY;
+        // Draw period bars
+        this.drawPeriodBars();
 
-        this.renderTimeline();
+        // Draw character lifespan bars
+        this.drawCharacterLifespans();
+
+        // Draw events
+        this.drawEvents();
+
+        // Draw year markers
+        this.drawYearMarkers();
     }
 
-    endDrag() {
-        this.isDragging = false;
-    }
+    drawBackground() {
+        // Vintage paper texture
+        const gradient = this.ctx.createLinearGradient(0, 0, 0, this.canvas.height);
+        gradient.addColorStop(0, '#f4f1e8');
+        gradient.addColorStop(1, '#e8e4d9');
+        this.ctx.fillStyle = gradient;
+        this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
 
-    handleTouchStart(e) {
-        if (e.touches.length === 1) {
-            const touch = e.touches[0];
-            this.lastMouseX = touch.clientX;
-            this.lastMouseY = touch.clientY;
-            this.isDragging = true;
+        // Add subtle texture lines
+        this.ctx.strokeStyle = 'rgba(139, 115, 85, 0.05)';
+        this.ctx.lineWidth = 1;
+        for (let i = 0; i < this.canvas.height; i += 20) {
+            this.ctx.beginPath();
+            this.ctx.moveTo(0, i);
+            this.ctx.lineTo(this.canvas.width, i);
+            this.ctx.stroke();
         }
     }
 
-    handleTouchMove(e) {
-        if (e.touches.length === 1 && this.isDragging) {
-            e.preventDefault();
-            const touch = e.touches[0];
-            const deltaX = touch.clientX - this.lastMouseX;
-            const deltaY = touch.clientY - this.lastMouseY;
+    drawMainTimeline() {
+        const y = 100;
 
-            this.panX += deltaX;
-            this.panY += deltaY;
+        // Main timeline bar
+        this.ctx.strokeStyle = '#8b7355';
+        this.ctx.lineWidth = 4;
+        this.ctx.beginPath();
+        this.ctx.moveTo(50, y);
+        this.ctx.lineTo(this.canvas.width - 50, y);
+        this.ctx.stroke();
 
-            this.lastMouseX = touch.clientX;
-            this.lastMouseY = touch.clientY;
-
-            this.renderTimeline();
-        }
+        // Title
+        this.ctx.fillStyle = '#2c2416';
+        this.ctx.font = 'bold 24px Georgia';
+        this.ctx.textAlign = 'center';
+        const title = languageManager.currentLang === 'en' ? 'BIBLICAL TIMELINE' : 'ציר הזמן המקראי';
+        this.ctx.fillText(title, this.canvas.width / 2, 40);
     }
 
-    handleHover(e) {
-        const rect = this.canvas.getBoundingClientRect();
-        const mouseX = (e.clientX - rect.left - this.panX) / this.zoomLevel;
-        const mouseY = (e.clientY - rect.top - this.panY) / this.zoomLevel;
+    drawPeriodBars() {
+        const startY = 120;
+        const barHeight = 60;
 
-        // Check if hovering over any event
-        const hoveredEvent = this.getEventAtPosition(mouseX, mouseY);
+        biblicalData.periods.forEach((period, index) => {
+            const x1 = this.yearToX(period.startYear);
+            const x2 = this.yearToX(period.endYear);
+            const width = x2 - x1;
 
-        if (hoveredEvent) {
-            this.canvas.style.cursor = 'pointer';
-            this.showTooltip(hoveredEvent, e.clientX, e.clientY);
-        } else {
-            this.canvas.style.cursor = this.isDragging ? 'grabbing' : 'grab';
-            this.hideTooltip();
+            // Period bar
+            this.ctx.fillStyle = period.color + '88';
+            this.ctx.fillRect(x1, startY, width, barHeight);
+
+            // Border
+            this.ctx.strokeStyle = period.color;
+            this.ctx.lineWidth = 3;
+            this.ctx.strokeRect(x1, startY, width, barHeight);
+
+            // Period name
+            this.ctx.fillStyle = '#2c2416';
+            this.ctx.font = 'bold 14px Georgia';
+            this.ctx.textAlign = 'center';
+            const name = languageManager.getText(period.name);
+
+            // Text wrapping for long names
+            const maxWidth = width - 10;
+            const words = name.split(' ');
+            let line = '';
+            let y = startY + 25;
+
+            words.forEach(word => {
+                const testLine = line + word + ' ';
+                const metrics = this.ctx.measureText(testLine);
+                if (metrics.width > maxWidth && line !== '') {
+                    this.ctx.fillText(line, x1 + width / 2, y);
+                    line = word + ' ';
+                    y += 16;
+                } else {
+                    line = testLine;
+                }
+            });
+            this.ctx.fillText(line, x1 + width / 2, y);
+        });
+    }
+
+    drawCharacterLifespans() {
+        const startY = 220;
+        const barHeight = 30;
+        const spacing = 35;
+
+        // Sort characters by birth year
+        const characters = [...biblicalData.people].filter(p => p.lifespan).sort((a, b) => a.lifespan.born - b.lifespan.born);
+
+        characters.forEach((character, index) => {
+            const x1 = this.yearToX(character.lifespan.born);
+            const x2 = this.yearToX(character.lifespan.died);
+            const width = x2 - x1;
+            const y = startY + (index * spacing);
+
+            // Lifespan bar
+            const gradient = this.ctx.createLinearGradient(x1, y, x2, y);
+            gradient.addColorStop(0, '#6b2c2c');
+            gradient.addColorStop(1, '#b8860b');
+            this.ctx.fillStyle = gradient;
+            this.ctx.fillRect(x1, y, width, barHeight);
+
+            // Border
+            this.ctx.strokeStyle = '#2c2416';
+            this.ctx.lineWidth = 2;
+            this.ctx.strokeRect(x1, y, width, barHeight);
+
+            // Character name
+            this.ctx.fillStyle = 'white';
+            this.ctx.font = 'bold 12px Arial';
+            this.ctx.textAlign = 'left';
+            const name = languageManager.getText(character.name);
+            this.ctx.fillText(name, x1 + 5, y + 18);
+
+            // Years lived
+            const yearsLived = Math.abs(character.lifespan.died - character.lifespan.born);
+            this.ctx.font = '10px Arial';
+            this.ctx.fillText(`${yearsLived} yrs`, x1 + 5, y + 28);
+
+            // Store click area
+            character._clickArea = { x: x1, y, width, height: barHeight };
+        });
+    }
+
+    drawEvents() {
+        const eventsY = 220 + (biblicalData.people.filter(p => p.lifespan).length * 35) + 50;
+
+        // Group events by period for better layout
+        biblicalData.events.filter(e => e.tags.includes('major')).forEach((event, index) => {
+            const x = this.yearToX(event.year);
+            const y = eventsY + (Math.floor(index / 3) * 80);
+
+            // Event marker
+            this.ctx.fillStyle = '#6b2c2c';
+            this.ctx.beginPath();
+            this.ctx.arc(x, y, 8, 0, Math.PI * 2);
+            this.ctx.fill();
+
+            this.ctx.strokeStyle = '#b8860b';
+            this.ctx.lineWidth = 2;
+            this.ctx.stroke();
+
+            // Event line to timeline
+            this.ctx.strokeStyle = '#8b735544';
+            this.ctx.lineWidth = 1;
+            this.ctx.setLineDash([5, 5]);
+            this.ctx.beginPath();
+            this.ctx.moveTo(x, 100);
+            this.ctx.lineTo(x, y);
+            this.ctx.stroke();
+            this.ctx.setLineDash([]);
+
+            // Event name
+            this.ctx.fillStyle = '#2c2416';
+            this.ctx.font = '11px Georgia';
+            this.ctx.textAlign = 'center';
+            const name = languageManager.getText(event.name);
+            this.ctx.fillText(name, x, y + 25);
+
+            // Year
+            this.ctx.font = 'bold 10px Arial';
+            this.ctx.fillStyle = '#b8860b';
+            this.ctx.fillText(Math.abs(event.year) + ' BCE', x, y + 38);
+
+            // Store click area
+            event._clickArea = { x: x - 30, y: y - 30, width: 60, height: 80 };
+        });
+    }
+
+    drawYearMarkers() {
+        const y = 100;
+        const markerInterval = 500; // Every 500 years
+
+        for (let year = this.startYear; year <= this.endYear; year += markerInterval) {
+            const x = this.yearToX(year);
+
+            // Marker line
+            this.ctx.strokeStyle = '#8b7355';
+            this.ctx.lineWidth = 2;
+            this.ctx.beginPath();
+            this.ctx.moveTo(x, y - 15);
+            this.ctx.lineTo(x, y + 15);
+            this.ctx.stroke();
+
+            // Year label
+            this.ctx.fillStyle = '#2c2416';
+            this.ctx.font = 'bold 12px Arial';
+            this.ctx.textAlign = 'center';
+            this.ctx.fillText(Math.abs(year), x, y - 20);
         }
     }
 
     handleClick(e) {
         const rect = this.canvas.getBoundingClientRect();
-        const mouseX = (e.clientX - rect.left - this.panX) / this.zoomLevel;
-        const mouseY = (e.clientY - rect.top - this.panY) / this.zoomLevel;
+        const x = e.clientX - rect.left + this.container.scrollLeft;
+        const y = e.clientY - rect.top;
 
-        const clickedEvent = this.getEventAtPosition(mouseX, mouseY);
-
-        if (clickedEvent) {
-            this.showEventDetails(clickedEvent);
-        }
-    }
-
-    getEventAtPosition(x, y) {
-        const events = this.getFilteredEvents();
-
-        for (let event of events) {
-            const eventX = this.yearToX(event.year);
-            const eventY = this.getEventY(event);
-            const radius = 12;
-
-            const distance = Math.sqrt(Math.pow(x - eventX, 2) + Math.pow(y - eventY, 2));
-
-            if (distance <= radius) {
-                return event;
+        // Check character clicks
+        for (let character of biblicalData.people) {
+            if (character._clickArea) {
+                const area = character._clickArea;
+                if (x >= area.x && x <= area.x + area.width &&
+                    y >= area.y && y <= area.y + area.height) {
+                    this.showCharacterDetails(character);
+                    return;
+                }
             }
         }
 
-        return null;
-    }
-
-    showTooltip(event, screenX, screenY) {
-        let tooltip = document.getElementById('timelineTooltip');
-
-        if (!tooltip) {
-            tooltip = document.createElement('div');
-            tooltip.id = 'timelineTooltip';
-            tooltip.className = 'timeline-tooltip';
-            this.overlay.appendChild(tooltip);
+        // Check event clicks
+        for (let event of biblicalData.events) {
+            if (event._clickArea) {
+                const area = event._clickArea;
+                if (x >= area.x && x <= area.x + area.width &&
+                    y >= area.y && y <= area.y + area.height) {
+                    this.showEventDetails(event);
+                    return;
+                }
+            }
         }
-
-        const name = languageManager.getText(event.name);
-        const desc = languageManager.getText(event.description);
-
-        tooltip.innerHTML = `
-            <h4>${name}</h4>
-            <p>${Math.abs(event.year)} ${event.year < 0 ? 'BCE' : 'CE'}</p>
-        `;
-
-        tooltip.style.left = (screenX - this.container.getBoundingClientRect().left + 10) + 'px';
-        tooltip.style.top = (screenY - this.container.getBoundingClientRect().top + 10) + 'px';
-        tooltip.classList.add('visible');
     }
 
-    hideTooltip() {
-        const tooltip = document.getElementById('timelineTooltip');
-        if (tooltip) {
-            tooltip.classList.remove('visible');
+    showCharacterDetails(character) {
+        if (window.charactersManager) {
+            window.charactersManager.showCharacterDetails(character.id);
         }
     }
 
@@ -234,258 +368,29 @@ class TimelineManager {
 
         const name = languageManager.getText(event.name);
         const desc = languageManager.getText(event.description);
-        const period = biblicalData.periods.find(p => p.id === event.period);
-        const periodName = period ? languageManager.getText(period.name) : '';
 
         modalBody.innerHTML = `
             <h2>${name}</h2>
-            <div style="color: var(--vintage-gold); font-weight: bold; font-size: 1.2rem; margin-bottom: 1rem;">
-                ${Math.abs(event.year)} ${event.year < 0 ? 'BCE' : 'CE'}
+            <div style="color: var(--vintage-gold); font-weight: bold; font-size: 1.3rem; margin: 1rem 0;">
+                ${Math.abs(event.year)} BCE
             </div>
-            <div style="background: var(--vintage-tan); padding: 0.5rem 1rem; border-radius: 6px; display: inline-block; margin-bottom: 1rem;">
-                ${periodName}
-            </div>
-            <p style="font-size: 1.1rem; line-height: 1.8; margin-bottom: 1rem;">${desc}</p>
-            ${event.reference ? `<p style="font-style: italic; color: var(--text-secondary);">Reference: ${event.reference}</p>` : ''}
+            <p style="font-size: 1.1rem; line-height: 1.8;">${desc}</p>
+            ${event.reference ? `<p style="margin-top: 1rem; font-style: italic; color: var(--text-secondary);">Reference: ${event.reference}</p>` : ''}
             <div style="margin-top: 1.5rem;">
                 ${event.tags.map(tag => `<span class="event-tag">${tag}</span>`).join(' ')}
             </div>
         `;
 
         modal.classList.add('active');
-
-        // Set up favorite button
-        const favoriteBtn = document.getElementById('modalFavorite');
-        if (window.favoritesManager) {
-            const isFavorited = window.favoritesManager.isFavorite(event.id);
-            favoriteBtn.classList.toggle('favorited', isFavorited);
-            favoriteBtn.onclick = () => {
-                window.favoritesManager.toggleFavorite({
-                    id: event.id,
-                    type: 'event',
-                    name: event.name,
-                    data: event
-                });
-                favoriteBtn.classList.toggle('favorited');
-            };
-        }
-    }
-
-    getFilteredEvents() {
-        if (this.currentFilter === 'all') {
-            return biblicalData.events;
-        }
-        return biblicalData.events.filter(event => event.period === this.currentFilter);
-    }
-
-    getFilteredPeriods() {
-        if (this.currentFilter === 'all') {
-            return biblicalData.periods;
-        }
-        return biblicalData.periods.filter(period => period.id === this.currentFilter);
-    }
-
-    yearToX(year) {
-        // Convert year to X position on canvas
-        const minYear = -4004;
-        const maxYear = -400;
-        const totalYears = maxYear - minYear;
-        const yearOffset = year - minYear;
-        const percentage = yearOffset / totalYears;
-
-        return 50 + (percentage * (this.canvas.width - 100));
-    }
-
-    getEventY(event) {
-        // Distribute events vertically based on their period
-        const periods = biblicalData.periods;
-        const periodIndex = periods.findIndex(p => p.id === event.period);
-
-        return 100 + (periodIndex * 60) + (Math.random() * 30);
-    }
-
-    renderTimeline() {
-        // Clear canvas
-        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-
-        // Save context state
-        this.ctx.save();
-
-        // Apply zoom and pan transformations
-        this.ctx.translate(this.panX, this.panY);
-        this.ctx.scale(this.zoomLevel, this.zoomLevel);
-
-        // Draw timeline background
-        this.drawTimelineBackground();
-
-        // Draw periods
-        this.drawPeriods();
-
-        // Draw main timeline line
-        this.drawMainLine();
-
-        // Draw events
-        this.drawEvents();
-
-        // Draw year labels
-        this.drawYearLabels();
-
-        // Restore context state
-        this.ctx.restore();
-    }
-
-    drawTimelineBackground() {
-        // Draw subtle grid
-        this.ctx.strokeStyle = 'rgba(139, 115, 85, 0.1)';
-        this.ctx.lineWidth = 1;
-
-        for (let i = 0; i < this.canvas.height; i += 50) {
-            this.ctx.beginPath();
-            this.ctx.moveTo(0, i);
-            this.ctx.lineTo(this.canvas.width, i);
-            this.ctx.stroke();
-        }
-    }
-
-    drawPeriods() {
-        const periods = this.getFilteredPeriods();
-
-        periods.forEach((period, index) => {
-            const startX = this.yearToX(period.startYear);
-            const endX = this.yearToX(period.endYear);
-            const y = 50 + (index * 60);
-            const height = 40;
-
-            // Draw period rectangle
-            this.ctx.fillStyle = period.color + '33'; // Add transparency
-            this.ctx.fillRect(startX, y, endX - startX, height);
-
-            // Draw period border
-            this.ctx.strokeStyle = period.color;
-            this.ctx.lineWidth = 2;
-            this.ctx.strokeRect(startX, y, endX - startX, height);
-
-            // Draw period name
-            this.ctx.fillStyle = '#2c2416';
-            this.ctx.font = 'bold 14px Georgia';
-            this.ctx.textAlign = 'center';
-            const periodName = languageManager.getText(period.name);
-            this.ctx.fillText(periodName, startX + (endX - startX) / 2, y + 25);
-        });
-    }
-
-    drawMainLine() {
-        const minYear = -4004;
-        const maxYear = -400;
-
-        const startX = this.yearToX(minYear);
-        const endX = this.yearToX(maxYear);
-        const y = this.canvas.height / 2;
-
-        this.ctx.strokeStyle = '#8b7355';
-        this.ctx.lineWidth = 4;
-        this.ctx.beginPath();
-        this.ctx.moveTo(startX, y);
-        this.ctx.lineTo(endX, y);
-        this.ctx.stroke();
-    }
-
-    drawEvents() {
-        const events = this.getFilteredEvents();
-
-        events.forEach(event => {
-            const x = this.yearToX(event.year);
-            const y = this.getEventY(event);
-
-            // Draw event marker
-            const period = biblicalData.periods.find(p => p.id === event.period);
-            const color = period ? period.color : '#6b2c2c';
-
-            // Draw outer circle
-            this.ctx.fillStyle = color;
-            this.ctx.beginPath();
-            this.ctx.arc(x, y, 12, 0, Math.PI * 2);
-            this.ctx.fill();
-
-            // Draw border
-            this.ctx.strokeStyle = '#b8860b';
-            this.ctx.lineWidth = 3;
-            this.ctx.stroke();
-
-            // Draw inner dot for major events
-            if (event.tags.includes('major')) {
-                this.ctx.fillStyle = 'white';
-                this.ctx.beginPath();
-                this.ctx.arc(x, y, 5, 0, Math.PI * 2);
-                this.ctx.fill();
-            }
-
-            // Draw connecting line to timeline
-            this.ctx.strokeStyle = color + '88';
-            this.ctx.lineWidth = 2;
-            this.ctx.setLineDash([5, 3]);
-            this.ctx.beginPath();
-            this.ctx.moveTo(x, y);
-            this.ctx.lineTo(x, this.canvas.height / 2);
-            this.ctx.stroke();
-            this.ctx.setLineDash([]);
-        });
-    }
-
-    drawYearLabels() {
-        const yearMarkers = [-4000, -3000, -2000, -1500, -1000, -500];
-
-        this.ctx.fillStyle = '#2c2416';
-        this.ctx.font = 'bold 12px Arial';
-        this.ctx.textAlign = 'center';
-
-        yearMarkers.forEach(year => {
-            const x = this.yearToX(year);
-            const y = this.canvas.height - 20;
-
-            // Draw tick mark
-            this.ctx.strokeStyle = '#8b7355';
-            this.ctx.lineWidth = 2;
-            this.ctx.beginPath();
-            this.ctx.moveTo(x, y - 10);
-            this.ctx.lineTo(x, y + 10);
-            this.ctx.stroke();
-
-            // Draw year label
-            this.ctx.fillText(Math.abs(year) + ' BCE', x, y + 25);
-        });
-    }
-
-    setupLegend() {
-        const legendItems = document.getElementById('legendItems');
-        if (!legendItems) return;
-
-        legendItems.innerHTML = '';
-
-        biblicalData.periods.forEach(period => {
-            const item = document.createElement('div');
-            item.className = 'legend-item';
-
-            const colorBox = document.createElement('div');
-            colorBox.className = 'legend-color';
-            colorBox.style.backgroundColor = period.color;
-
-            const label = document.createElement('span');
-            label.textContent = languageManager.getText(period.name);
-
-            item.appendChild(colorBox);
-            item.appendChild(label);
-            legendItems.appendChild(item);
-        });
     }
 }
 
-// Initialize timeline when DOM is ready
-let timelineManager;
+// Initialize
+window.interactiveTimelineManager = null;
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', () => {
-        timelineManager = new TimelineManager();
+        window.interactiveTimelineManager = new InteractiveTimelineManager();
     });
 } else {
-    timelineManager = new TimelineManager();
+    window.interactiveTimelineManager = new InteractiveTimelineManager();
 }

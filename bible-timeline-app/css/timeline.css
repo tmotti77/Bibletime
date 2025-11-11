@@ -725,3 +725,66 @@
     color: var(--text-secondary);
     line-height: 1.6;
 }
+
+/* ============================================
+   INTERACTIVE HORIZONTAL TIMELINE STYLES
+   ============================================ */
+
+.timeline-container {
+    background: white;
+    border: 4px solid var(--vintage-gold);
+    border-radius: 8px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    box-shadow: 0 8px 24px var(--shadow);
+    cursor: grab;
+    min-height: 600px;
+}
+
+.timeline-container:active {
+    cursor: grabbing;
+}
+
+#timelineCanvas {
+    display: block;
+}
+
+.timeline-legend {
+    margin-top: var(--spacing-lg);
+    background: var(--vintage-cream);
+    border: 3px solid var(--vintage-brown);
+    border-radius: 8px;
+    padding: var(--spacing-lg);
+    box-shadow: 0 4px 12px var(--shadow);
+}
+
+.timeline-legend h3 {
+    font-family: var(--font-display);
+    color: var(--vintage-burgundy);
+    margin-bottom: var(--spacing-md);
+    font-size: 1.3rem;
+}
+
+.timeline-legend p {
+    color: var(--text-secondary);
+    line-height: 1.8;
+}
+
+/* Scrollbar styling */
+.timeline-container::-webkit-scrollbar {
+    height: 12px;
+}
+
+.timeline-container::-webkit-scrollbar-track {
+    background: var(--vintage-tan);
+    border-radius: 6px;
+}
+
+.timeline-container::-webkit-scrollbar-thumb {
+    background: var(--vintage-burgundy);
+    border-radius: 6px;
+}
+
+.timeline-container::-webkit-scrollbar-thumb:hover {
+    background: var(--vintage-navy);
+}

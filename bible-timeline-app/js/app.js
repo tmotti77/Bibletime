@@ -90,8 +90,8 @@ class App {
         // Perform any page-specific setup
         switch (pageName) {
             case 'timeline':
-                if (window.chartTimelineManager) {
-                    window.chartTimelineManager.createHotspots();
+                if (window.interactiveTimelineManager) {
+                    window.interactiveTimelineManager.render();
                 }
                 break;
 

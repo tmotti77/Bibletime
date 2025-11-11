@@ -50,43 +50,27 @@
     <!-- Main Content Area -->
     <main class="main-content">
 
-        <!-- Timeline Page - Chart Based -->
+        <!-- Timeline Page - Interactive Horizontal Bars -->
         <section id="timeline-page" class="page active">
             <div class="timeline-controls">
-                <div class="control-group">
-                    <label data-en="View Chart:" data-he=":בחר תרשים">View Chart:</label>
-                    <select id="chartSelector" class="chart-select">
-                        <option value="overview">Overview Timeline</option>
-                        <option value="detailed">Detailed Events</option>
-                        <option value="people">People & Lifespans</option>
-                        <option value="culture">Culture & Artifacts</option>
-                    </select>
-                </div>
-
                 <div class="zoom-controls">
                     <button id="zoomOut">➖</button>
                     <span id="zoomLevel">100%</span>
                     <button id="zoomIn">➕</button>
                     <button id="resetView" data-en="Reset View" data-he="איפוס תצוגה">Reset View</button>
-                    <button id="fullscreen" data-en="Fullscreen" data-he="מסך מלא">⛶</button>
                 </div>
             </div>
 
-            <!-- Interactive Chart Container -->
-            <div class="chart-viewer" id="chartViewer">
-                <div class="chart-container" id="chartContainer">
-                    <img id="chartImage" src="infoimage/Screenshot 2025-11-11 074429.png" alt="Biblical Timeline Chart">
-                    <!-- Interactive hotspots will be added dynamically -->
-                    <div class="chart-hotspots" id="chartHotspots"></div>
-                </div>
+            <div class="timeline-container" id="timelineContainer">
+                <canvas id="timelineCanvas"></canvas>
+            </div>
 
-                <!-- Chart Legend/Guide -->
-                <div class="chart-guide" id="chartGuide">
-                    <p data-en="💡 Click on the chart to explore events, people, and artifacts interactively!"
-                       data-he="!💡 לחץ על התרשים כדי לחקור אירועים, אנשים וחפצים באופן אינטראקטיבי">
-                       💡 Click on the chart to explore events, people, and artifacts interactively!
-                    </p>
-                </div>
+            <div class="timeline-legend">
+                <h3 data-en="How to Use" data-he="איך להשתמש">How to Use</h3>
+                <p data-en="• Zoom in/out with +/- buttons • Click and drag to scroll • Click on character bars or events for details"
+                   data-he="• הגדל/הקטן עם כפתורי +/- • לחץ וגרור כדי לגלול • לחץ על פסי דמויות או אירועים לפרטים">
+                   • Zoom in/out with +/- buttons • Click and drag to scroll • Click on character bars or events for details
+                </p>
             </div>
         </section>
 
@@ -198,7 +182,7 @@
     <!-- Scripts -->
     <script src="js/data.js"></script>
     <script src="js/language.js"></script>
-    <script src="js/chart-timeline.js"></script>
+    <script src="js/timeline.js"></script>
     <script src="js/characters.js"></script>
     <script src="js/learn.js"></script>
     <script src="js/quiz.js"></script>
