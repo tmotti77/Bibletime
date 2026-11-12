@@ -486,7 +486,7 @@ function c6_sea(g, k, t, S) {
     wash(g, seaShape, '#3F86AE', 0.5, 0.004);
     for (let j = 0; j <= N; j++) {
       const d = j / N, y = seaY(d), amp = 0.002 + 0.011 * d, fr = 26 - 15 * d, ph = hash1(400 + j) * 6, sp = 0.5 + 0.9 * d;
-      g.strokeStyle = j % 2 ? '#9CC9D8' : '#173A5C'; g.lineWidth = 0.004 + 0.008 * d; g.globalAlpha = 0.9; g.beginPath();
+      g.strokeStyle = j % 2 ? '#bfe6e0' : '#0c2434'; g.lineWidth = 0.0025 + 0.006 * d; g.globalAlpha = j % 2 ? 0.22 + 0.3 * hash1(430 + j) : 0.5; g.beginPath();
       for (let x = -1.5; x <= 1.5; x += 0.012) {
         const pile = open * 0.035 * d * Math.exp(-((Math.abs(x) - surfX(d)) ** 2) / 0.012);    // the water heaps up at the edge
         const yy = y + amp * Math.sin(x * fr + t * sp + ph) + amp * 0.5 * Math.sin(x * fr * 2.3 - t * sp * 1.3 + ph) - pile;
@@ -537,7 +537,12 @@ function c6_sea(g, k, t, S) {
       walkers.push({ px, py, ph, w, salt: c.salt, d });
     }
     walkers.sort((a, b) => a.py - b.py);
-    for (const p of walkers) person(g, p.px, p.py, p.ph, { back: true, face: p.salt % 2 ? 1 : -1, arm: 0.1, p: p.w * 14 + p.salt * 0.3, salt: p.salt, wash: p.salt % 5 === 0 ? PALETTE.accent : p.salt % 3 === 0 ? PALETTE.blue : null, washA: 0.45 });
+    for (const p of walkers) person(g, p.px, p.py, p.ph, { back: true, face: p.salt % 2 ? 1 : -1, arm: 0.1, p: p.w * 14 + p.salt * 0.3 + 0.1 * Math.sin(t * 2.4 + p.salt), arm0: 1, salt: p.salt, wash: p.salt % 5 === 0 ? PALETTE.accent : p.salt % 3 === 0 ? PALETTE.blue : null, washA: 0.45 });
+    for (let i = 0; i < 9; i++) {                       // the army comes up behind them with torches, and stops when the sea stands up
+      const cx = -1.75 + i * 0.07 + 0.62 * EASE.out(A(tl, 0, 4.4)) - 0.25 * EASE.inOut(A(ts, 1, 3)), hnd = person(g, cx, 0.492, 0.12, { face: 1, arm: 0.75, staff: i % 2 === 0, p: tl * 1.8 + i * 0.3, salt: 60 + i });
+      if (i % 2) { glow(g, hnd[0], hnd[1] - 0.012, 0.07 + 0.015 * noise1(t * 8 + i), 0.9, '255,150,60'); g.fillStyle = '#ffd08a'; g.beginPath(); g.arc(hnd[0], hnd[1] - 0.012, 0.007, 0, TAU); g.fill(); }
+    }
+    for (let i = 0; i < 6; i++) { const gx = ((0.12 * t + i * 0.37) % 2.6) - 1.3, gy = HZ - 0.12 - 0.06 * Math.sin(i * 2.1) + 0.02 * Math.sin(t * 1.3 + i), fl = 0.014 * Math.sin(t * 10 + i * 2); stroke(g, [[gx - 0.025, gy - 0.008 + fl], [gx, gy], [gx + 0.025, gy - 0.008 + fl]], 0.003, SIL); }
     // Moses: on a rock at the right, the staff goes up and the sea answers
     const rock = (g) => { g.moveTo(0.5, 0.56); g.lineTo(0.53, 0.44); g.lineTo(0.6, 0.405); g.lineTo(0.7, 0.42); g.lineTo(0.76, 0.56); g.closePath(); };
     g.fillStyle = SIL; g.beginPath(); rock(g); g.fill();
@@ -567,6 +572,20 @@ function night(g, x0, y0, w, h, a, salt = 71) {
 }
 
 // ------------------------------ C2 The Flood ------------------------------
+// An animal as a silhouette: body, four legs that step, a neck and a head. kind: 0 sheep, 1 deer, 2 giraffe, 3 elephant, 4 camel.
+function animal(g, x, y, s, kind = 0, p = 0, face = 1) {
+  const K = [[1, 0.5, 0.35, 0.5, 0.55], [1, 0.4, 0.7, 0.7, 0.9], [1.1, 0.42, 1.9, 0.35, 1.5], [1.7, 0.95, 0.5, 1.2, 0.95], [1.3, 0.55, 0.9, 0.5, 1.1]][kind], [bl, bh, nl, hs, lg] = K;
+  g.save(); g.translate(x, y); g.scale(face * s, s); g.fillStyle = SIL; g.strokeStyle = SIL; g.lineCap = 'round';
+  g.lineWidth = kind === 3 ? 0.3 : 0.13; for (let i = 0; i < 4; i++) { const lx = (i < 2 ? -1 : 1) * bl * 0.36 + (i % 2) * 0.12, sw = Math.sin(p * TAU + i * 1.7) * 0.22; g.beginPath(); g.moveTo(lx, -lg); g.lineTo(lx + sw, 0); g.stroke(); }
+  g.beginPath(); g.ellipse(0, -lg - bh * 0.4, bl * 0.55, bh * 0.55, 0, 0, TAU); g.fill();
+  if (kind === 4) { g.beginPath(); g.ellipse(-0.05, -lg - bh * 0.95, 0.3, 0.28, 0, 0, TAU); g.fill(); }
+  const nx = bl * 0.45, ny = -lg - bh * 0.6, hx = nx + nl * 0.45, hy = ny - nl * 0.85;
+  g.lineWidth = kind === 3 ? 0.4 : 0.2; g.beginPath(); g.moveTo(nx, ny); g.lineTo(hx, hy); g.stroke();
+  g.beginPath(); g.ellipse(hx + hs * 0.2, hy, hs * 0.42, hs * 0.26, 0.2, 0, TAU); g.fill();
+  if (kind === 3) { g.lineWidth = 0.16; g.beginPath(); g.moveTo(hx + hs * 0.5, hy); g.quadraticCurveTo(hx + hs * 0.9, hy + 0.7, hx + hs * 0.6, hy + 1.1 + 0.1 * Math.sin(p * TAU)); g.stroke(); g.beginPath(); g.ellipse(hx - 0.1, hy + 0.1, 0.42, 0.55, 0, 0, TAU); g.fill(); }
+  if (kind === 1) { g.lineWidth = 0.05; for (const d of [-0.12, 0.1]) { g.beginPath(); g.moveTo(hx, hy - 0.1); g.lineTo(hx + d, hy - 0.5); g.lineTo(hx + d + 0.14, hy - 0.68); g.stroke(); } }
+  g.restore();
+}
 function ark(g, x, y, s, rock = 0) {                  // the ark, its waterline at (x, y), s = half its length
   g.save(); g.translate(x, y); g.rotate(rock);
   const hull = (g) => { g.moveTo(-s, -s * 0.28); g.quadraticCurveTo(-s * 0.9, s * 0.2, -s * 0.5, s * 0.22); g.lineTo(s * 0.55, s * 0.22); g.quadraticCurveTo(s * 0.95, s * 0.2, s * 1.08, -s * 0.34); g.closePath(); };
@@ -587,6 +606,8 @@ function c2_flood(g, k, t, S) {
   const rain = A(tl, 0.6, 2) * (1 - A(tl, 8.2, 2.6)), bow = EASE.inOut(A(tl, 9.6, 4.2));
   const cam = CAM.base(); cam.x = lerp(-1.25, 0, run) + 1.25 * leave; cam.y = (arkY - 0.1) * 0.85; cam.dist = 1 + 0.08 * rise - 0.08 * leave;
   chartPaper(g, S, cam, 2);
+  const zap = [1.9, 4.3, 6.6, 8.4].map((b) => 1 - A(tl, b, 0.45)).find((v) => v > 0 && v < 1) ?? 0, zi = [1.9, 4.3, 6.6, 8.4].findIndex((b) => tl >= b && tl < b + 0.45);
+  if (zap > 0) { g.save(); g.setTransform(1, 0, 0, 1, 0, 0); g.fillStyle = `rgba(220,232,255,${0.5 * zap * zap})`; g.fillRect(0, 0, S.W, S.H); g.restore(); }
   plane(g, S, cam, 0.28, (g) => {                     // far: the cloud that closes, far hills that go under
     land(g, (x) => 0.16 - 0.06 * Math.sin(x * 2.1) - 0.03 * Math.sin(x * 5.3 + 1), -1.8, 3.4, 0.5, { ang: 0.08, gap: 0.011, salt: 43, wash: PALETTE.green, washA: 0.3 * (1 - rise) + 0.3 * ebb });
     hatch(g, (g) => g.rect(-1.8, -0.9, 5.2, 0.62), { ang: -0.3, gap: 0.011, w: 0.0015, alpha: 0.75 * (1 - 0.8 * bow), box: [-1.8, -0.9, 3.4, -0.28], k: A(tl, 0.2, 2.6), salt: 44, cross: true });
@@ -600,14 +621,21 @@ function c2_flood(g, k, t, S) {
       else { stroke(g, [[hx, hy], [hx, hy - 0.06]], 0.003, PALETTE.ink); wash(g, (g) => g.arc(hx, hy - 0.075, 0.03, 0, TAU), PALETTE.green, 0.5 * (1 - rise)); g.strokeStyle = PALETTE.ink; g.lineWidth = 0.002; g.beginPath(); g.arc(hx, hy - 0.075, 0.03, 0, TAU); g.stroke(); }
     }
     lineage(g, -2.4, lerp(-2.4, -0.42, run), GY);       // the line reaches the hill and the water closes over it
+    for (let i = 0; i < 8; i++) { const bu = A(tl, 2.5 + i * 0.2, 4.5); if (bu > 0 && bu < 1) { const bx = -0.9 + i * 0.25 + 0.5 * bu * (i % 2 ? 1 : -1), by = 0.1 - 0.5 * bu - 0.05 * Math.sin(i), fl = 0.014 * Math.sin(t * 13 + i); stroke(g, [[bx - 0.022, by - 0.008 + fl], [bx, by], [bx + 0.022, by - 0.008 + fl]], 0.003, SIL); } }   // birds leave the trees
     if (level < 0.66) {
       g.save(); g.beginPath(); g.rect(-2.4, level, 5.8, 1); g.clip();
       wash(g, (g) => g.rect(-2.4, level, 5.8, 1), PALETTE.blue, 0.62, 0);
       waves(g, -2.4, 3.4, level, level + 0.45, t, 14, 9);
       g.restore();
     }
+    if (zap > 0) { const bx = [-0.55, 0.5, -0.2, 0.7][zi], z = [[bx, -0.6]]; for (let j = 1; j <= 7; j++) z.push([bx + (hash1(zi * 20 + j) - 0.5) * 0.16, -0.6 + j * 0.085]); stroke(g, z, 0.008, STARLIGHT, 1, zap); }
+    for (let i = 0; i < 10; i++) {                      // two by two, up the hill and in
+      const u = A(tl, 0.1 + Math.floor(i / 2) * 0.55 + (i % 2) * 0.12, 3.4); if (u >= 1) continue;
+      const ax = lerp(-1.45 - Math.floor(i / 2) * 0.12 - (i % 2) * 0.07, -0.16, u);
+      animal(g, ax, hill(ax) + 0.004, [0.05, 0.055, 0.06, 0.07, 0.055][Math.floor(i / 2)], [3, 2, 4, 1, 0][Math.floor(i / 2)], tl * 1.6 + i * 0.3, 1);
+    }
     ark(g, 0, arkY + 0.012, 0.2, arkY < 0.095 ? 0.035 * Math.sin(t * 1.3 + 1) : 0);
-    g.save(); g.strokeStyle = PALETTE.ink; g.lineWidth = 0.0017; g.lineCap = 'round';      // the rain: ruled, slanted, falling
+    g.save(); g.strokeStyle = '#c8d6e2'; g.lineWidth = 0.002; g.lineCap = 'round';      // the rain: ruled, slanted, falling
     for (let i = 0; i < 190; i++) {
       const rx = cam.x - 1.2 + hash1(500 + i) * 2.4, ry = ((hash1(700 + i) + t * (1.3 + 0.5 * hash1(900 + i))) % 1) * 1.5 - 0.8;
       g.globalAlpha = 0.7 * rain * (0.4 + 0.6 * hash1(1100 + i)); g.beginPath(); g.moveTo(rx, ry); g.lineTo(rx - 0.022, ry + 0.07); g.stroke();
@@ -722,7 +750,7 @@ function c4_abraham(g, k, t, S) {
     for (const [i, [sx, sy, sr, q]] of abStars().entries()) {        // the stars come one at a time, as if counted
       const sk = MOTION.back(A(tl, 4.2 + i * 0.03, 0.35)) * dusk;
       if (sk <= 0) continue;
-      const tw = 0.75 + 0.25 * Math.sin(t * 3 + q * 40), r = sr * sk * tw;
+      const tw = 0.75 + 0.25 * Math.sin(t * 3 + q * 40), r = sr * 1.7 * sk * tw;
       g.fillStyle = STARLIGHT; g.globalAlpha = 1; g.beginPath(); g.arc(sx, sy, Math.max(0, r), 0, TAU); g.fill();
       if (q > 0.72) { g.strokeStyle = STARLIGHT; g.lineWidth = 0.0013; g.beginPath(); g.moveTo(sx - r * 3, sy); g.lineTo(sx + r * 3, sy); g.moveTo(sx, sy - r * 3); g.lineTo(sx, sy + r * 3); g.stroke(); }
     }
@@ -733,6 +761,10 @@ function c4_abraham(g, k, t, S) {
       const y0 = -0.35 + i * 0.06, pts = []; for (let j = 0; j <= 30; j++) { const x = -2.6 + j * 0.065; pts.push([x, y0 + 0.03 * Math.sin(x * (3 + i % 4) + i) + (0.24 - y0) * 0.12 * (j / 30)]); }
       stroke(g, pts, 0.003, PALETTE.dim, 1, 0.65 * (1 - dusk));
     }
+    for (const [st0, sx, sy] of [[6.4, 0.3, -0.52], [8.3, -0.5, -0.4]]) { const su = A(tl, st0, 0.7); if (su > 0 && su < 1) stroke(g, [[sx + 0.5 * su - 0.14, sy + 0.2 * su - 0.056], [sx + 0.5 * su, sy + 0.2 * su]], 0.004, STARLIGHT, 1, Math.sin(su * Math.PI)); }   // shooting stars
+    for (let i = 0; i < 8; i++) { const fx = -1.25 + i * 0.13 + 0.25 * run + 0.04 * Math.sin(tl * 0.5 + i * 2) + (i > 4 ? 1.75 : 0); animal(g, fx, GY + 0.004, 0.036 + 0.006 * (i % 3), 0, tl * 0.6 + i * 0.4, i % 3 ? 1 : -1); }   // the flock
+    animal(g, 0.86, GY + 0.004, 0.075, 4, 0.02 * Math.sin(tl), -1);
+    for (let i = 0; i < 12; i++) { const u = ((tl * 0.45 + i / 12) % 1), px = 0.62 + 0.05 * Math.sin(i * 3 + u * 5), py = GY - 0.03 - 0.3 * u; g.fillStyle = `rgba(255,170,80,${(1 - u) * dusk})`; g.beginPath(); g.arc(px, py, 0.004, 0, TAU); g.fill(); }   // sparks from the fire
     const tent = (g) => { g.moveTo(0.02, GY); g.lineTo(0.22, GY - 0.2); g.lineTo(0.46, GY); g.closePath(); };
     g.fillStyle = SIL; g.beginPath(); tent(g); g.fill(); wash(g, tent, PALETTE.accent, 0.35);
     hatch(g, tent, { ang: 1.15, gap: 0.016, w: 0.0016, alpha: 0.8, box: [0, GY - 0.2, 0.46, GY], salt: 75 });
