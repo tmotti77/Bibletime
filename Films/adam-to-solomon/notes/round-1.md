@@ -3,3 +3,6 @@ The sunset-silhouette look (user picked it from three), the music "Call of the D
 
 ## Notes, round 1
 - User chose: "Fix the slow parts first" (the Flood, Abraham night, the sea before it splits).
+
+## After draft 3
+- User chose: "Render the final".
