@@ -1,0 +1,6 @@
+FAILED: capture.mjs (exit 1)
+    at async grab (file:///home/user/Bibletime/Films/adam-to-solomon/tools/capture.mjs:353:19)
+    at async file:///home/user/Bibletime/Films/adam-to-solomon/tools/capture.mjs:243:19
+    at async Promise.all (index 0)
+    at async file:///home/user/Bibletime/Films/adam-to-solomon/tools/capture.mjs:237:3
+log: logs/make-stills.log

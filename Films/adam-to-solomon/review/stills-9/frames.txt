@@ -1,0 +1,12 @@
+file '/home/user/Bibletime/Films/adam-to-solomon/review/stills-9/000024.jpg'
+duration 1
+file '/home/user/Bibletime/Films/adam-to-solomon/review/stills-9/000156.jpg'
+duration 1
+file '/home/user/Bibletime/Films/adam-to-solomon/review/stills-9/000250.jpg'
+duration 1
+file '/home/user/Bibletime/Films/adam-to-solomon/review/stills-9/000326.jpg'
+duration 1
+file '/home/user/Bibletime/Films/adam-to-solomon/review/stills-9/002232.jpg'
+duration 1
+file '/home/user/Bibletime/Films/adam-to-solomon/review/stills-9/002340.jpg'
+duration 1

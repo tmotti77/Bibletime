@@ -1,0 +1,87 @@
+{
+ "query": "middle east",
+ "type": "music",
+ "results": [
+  {
+   "source": "archive",
+   "id": "TheCaliphateAndTheWorldsSeductiveSwell",
+   "title": "DJ Frankenstone- The Caliphate And The World's Seductive Spell [treetrunk 730]",
+   "creator": "Thomas Park",
+   "licence": "pd",
+   "page": "https://archive.org/details/TheCaliphateAndTheWorldsSeductiveSwell",
+   "file": "https://archive.org/download/TheCaliphateAndTheWorldsSeductiveSwell/affinity_known_program.mp3",
+   "thumb": null,
+   "type": "music",
+   "licence_url": "http://creativecommons.org/publicdomain/mark/1.0/",
+   "n": 1
+  },
+  {
+   "source": "archive",
+   "id": "ClientBiographyMangaRefused",
+   "title": "DJ Frankenstone- Client Biography Manga Refused [treetrunk 708]",
+   "creator": "DJ Frankenstone",
+   "licence": "pd",
+   "page": "https://archive.org/details/ClientBiographyMangaRefused",
+   "file": "https://archive.org/download/ClientBiographyMangaRefused/action-view_local_candidates.mp3",
+   "thumb": null,
+   "type": "music",
+   "licence_url": "http://creativecommons.org/publicdomain/mark/1.0/",
+   "n": 2
+  },
+  {
+   "source": "archive",
+   "id": "SouqSalvage",
+   "title": "Thomas Park- Souk Salvage [treetrunk 448]",
+   "creator": "Thomas Park",
+   "licence": "pd",
+   "page": "https://archive.org/details/SouqSalvage",
+   "file": "https://archive.org/download/SouqSalvage/Souq_2_1.mp3",
+   "thumb": null,
+   "type": "music",
+   "licence_url": "http://creativecommons.org/publicdomain/mark/1.0/",
+   "n": 3
+  },
+  {
+   "source": "archive",
+   "id": "MARAV986C",
+   "title": "Boss",
+   "creator": "Worm's Eye View",
+   "licence": "pd",
+   "page": "https://archive.org/details/MARAV986C",
+   "file": "https://archive.org/download/MARAV986C/01%20Man%20and%20Woman.mp3",
+   "thumb": null,
+   "type": "music",
+   "licence_url": "http://creativecommons.org/publicdomain/mark/1.0/",
+   "n": 4
+  },
+  {
+   "source": "archive",
+   "id": "jamendo-569832",
+   "title": "Julius Nox - Giulio's Page - All In My Mind",
+   "creator": "Julius Nox - Giulio's Page",
+   "licence": "cc-by",
+   "page": "https://archive.org/details/jamendo-569832",
+   "file": "https://archive.org/download/jamendo-569832/01-2179912-Julius%20Nox%20-%20Giulio_s%20Page-A%20new%20Beginning.mp3",
+   "thumb": null,
+   "type": "music",
+   "licence_url": "http://creativecommons.org/licenses/by/3.0/",
+   "n": 5
+  },
+  {
+   "source": "openverse",
+   "id": "5d80ec35-5c2e-4085-b44b-efbd7b3ce29d",
+   "title": "Sounds of the Middle East",
+   "creator": "Julius Nox - Giulio's Page",
+   "licence": "cc-by",
+   "page": "https://www.jamendo.com/track/2179913",
+   "file": "https://prod-1.storage.jamendo.com/?trackid=2179913&format=mp32",
+   "thumb": null,
+   "type": "music",
+   "licence_url": "https://creativecommons.org/licenses/by/3.0/",
+   "attribution": "\"Sounds of the Middle East\" by Julius Nox - Giulio's Page is licensed under CC BY 3.0. To view a copy of this license, visit https://creativecommons.org/licenses/by/3.0/.",
+   "provider": "jamendo",
+   "duration": 172.0,
+   "n": 6
+  }
+ ]
+}

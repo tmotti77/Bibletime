@@ -1,0 +1,70 @@
+{
+ "query": "arabic oud",
+ "type": "music",
+ "results": [
+  {
+   "source": "openverse",
+   "id": "9a4624f4-34b2-48f8-b396-8466b0812fdb",
+   "title": "ARABE",
+   "creator": "dj davidson",
+   "licence": "cc-by",
+   "page": "https://www.jamendo.com/track/1334195",
+   "file": "https://prod-1.storage.jamendo.com/?trackid=1334195&format=mp32",
+   "thumb": null,
+   "type": "music",
+   "licence_url": "https://creativecommons.org/licenses/by/3.0/",
+   "attribution": "\"ARABE\" by dj davidson is licensed under CC BY 3.0. To view a copy of this license, visit https://creativecommons.org/licenses/by/3.0/.",
+   "provider": "jamendo",
+   "duration": 667.0,
+   "n": 1
+  },
+  {
+   "source": "openverse",
+   "id": "0114836c-02b3-423a-b8fb-b772e9c93335",
+   "title": "FAS - Ariel",
+   "creator": "FAS",
+   "licence": "cc-by",
+   "page": "https://www.jamendo.com/track/1525358",
+   "file": "https://prod-1.storage.jamendo.com/?trackid=1525358&format=mp32",
+   "thumb": null,
+   "type": "music",
+   "licence_url": "https://creativecommons.org/licenses/by/3.0/",
+   "attribution": "\"FAS - Ariel\" by FAS is licensed under CC BY 3.0. To view a copy of this license, visit https://creativecommons.org/licenses/by/3.0/.",
+   "provider": "jamendo",
+   "duration": 179.0,
+   "n": 2
+  },
+  {
+   "source": "openverse",
+   "id": "ea8f2b60-ef01-4e39-bcac-92a640b82dfb",
+   "title": "oud topoud",
+   "creator": "Patrick Sainton",
+   "licence": "cc-by",
+   "page": "https://www.jamendo.com/track/810929",
+   "file": "https://prod-1.storage.jamendo.com/?trackid=810929&format=mp32",
+   "thumb": null,
+   "type": "music",
+   "licence_url": "https://creativecommons.org/licenses/by/3.0/",
+   "attribution": "\"oud topoud\" by Patrick Sainton is licensed under CC BY 3.0. To view a copy of this license, visit https://creativecommons.org/licenses/by/3.0/.",
+   "provider": "jamendo",
+   "duration": 54.0,
+   "n": 3
+  },
+  {
+   "source": "openverse",
+   "id": "eed6e524-384f-4f0a-ab29-b99e6161b509",
+   "title": "Tramrail-Oude groente",
+   "creator": "Tramrail",
+   "licence": "cc-by",
+   "page": "https://www.jamendo.com/track/1469697",
+   "file": "https://prod-1.storage.jamendo.com/?trackid=1469697&format=mp32",
+   "thumb": null,
+   "type": "music",
+   "licence_url": "https://creativecommons.org/licenses/by/3.0/",
+   "attribution": "\"Tramrail-Oude groente\" by Tramrail is licensed under CC BY 3.0. To view a copy of this license, visit https://creativecommons.org/licenses/by/3.0/.",
+   "provider": "jamendo",
+   "duration": 274.0,
+   "n": 4
+  }
+ ]
+}

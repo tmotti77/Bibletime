@@ -1,0 +1,29 @@
+{
+ "deals": [
+  {
+   "category": "type",
+   "seed": "2026-11-12:adam-to-solomon#1",
+   "dealt": [
+    "folk-horror",
+    "print-edition",
+    "slab-poster"
+   ],
+   "weights": {
+    "folk-horror": 1.0,
+    "print-edition": 1.0,
+    "slab-poster": 1.0
+   },
+   "look_families": [],
+   "filters": {
+    "purpose": "cinematic",
+    "look": null,
+    "mood": "engraved antique chart, victorian",
+    "latin_only": false
+   },
+   "redeal_reason": null,
+   "pick": null,
+   "reason": null,
+   "at": "2026-11-12T16:06"
+  }
+ ]
+}

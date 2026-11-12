@@ -1,0 +1,130 @@
+{
+ "title": null,
+ "pairings": [
+  {
+   "id": "folk-horror",
+   "why": "A blackletter gothic for the title, a fragile garalde for the lines: old print, a cold room.",
+   "setup": {
+    "display": {
+     "wght": 600
+    },
+    "text": {
+     "wght": 400
+    }
+   },
+   "card": null,
+   "roles": {
+    "display": {
+     "family": "Grenze Gotisch",
+     "pkg": "grenze-gotisch",
+     "version": "5.3.0",
+     "cap": 0.603,
+     "variable": "wght",
+     "varVersion": "5.3.0",
+     "axes": {
+      "wght": [
+       100,
+       900
+      ]
+     }
+    },
+    "text": {
+     "family": "Cormorant",
+     "pkg": "cormorant",
+     "version": "5.3.0",
+     "cap": 0.625,
+     "variable": "wght",
+     "varVersion": "5.3.0",
+     "axes": {
+      "wght": [
+       300.0,
+       700.0,
+       400.0
+      ]
+     }
+    },
+    "mono": null
+   }
+  },
+  {
+   "id": "print-edition",
+   "why": "Redaction's eroded grades give real ink loss; Space Mono labels read like a stamp. Swap grades over time for decay.",
+   "setup": {
+    "display": {
+     "grade": "redaction-50"
+    },
+    "text": {
+     "wght": 400
+    }
+   },
+   "card": null,
+   "roles": {
+    "display": {
+     "family": "Redaction",
+     "pkg": "redaction",
+     "version": "5.3.0",
+     "cap": 0.7,
+     "subsets": [
+      "latin"
+     ],
+     "weights": [
+      400,
+      700
+     ]
+    },
+    "text": {
+     "family": "Space Mono",
+     "pkg": "space-mono",
+     "version": "5.3.0",
+     "cap": 0.7,
+     "weights": [
+      400,
+      700
+     ]
+    },
+    "mono": null
+   }
+  },
+  {
+   "id": "slab-poster",
+   "why": "An ultra-bold slab over a geometric gothic: a fairground poster.",
+   "setup": {
+    "display": {},
+    "text": {
+     "wght": 500
+    }
+   },
+   "card": null,
+   "roles": {
+    "display": {
+     "family": "Chunk Five",
+     "pkg": "chunk-five",
+     "version": "5.3.0",
+     "cap": 0.699,
+     "subsets": [
+      "latin"
+     ],
+     "weights": [
+      800
+     ]
+    },
+    "text": {
+     "family": "League Spartan",
+     "pkg": "league-spartan",
+     "version": "5.3.0",
+     "cap": 0.66,
+     "variable": "wght",
+     "varVersion": "5.3.0",
+     "axes": {
+      "wght": [
+       100.0,
+       900.0,
+       400.0
+      ]
+     }
+    },
+    "mono": null
+   }
+  }
+ ]
+}

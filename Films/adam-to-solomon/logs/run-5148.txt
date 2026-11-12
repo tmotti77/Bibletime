@@ -1,0 +1,6 @@
+FAILED: capture.mjs (exit 1)
+ReferenceError: Cannot access 'M' before initialization
+    at file:///home/user/Bibletime/Films/adam-to-solomon/film.html?capture=1&w=1920&h=1080:83:54 (film.html?capture=1&w=1920&h=1080:83)
+    at openPage (file:///home/user/Bibletime/Films/adam-to-solomon/tools/capture.mjs:468:13)
+    at async file:///home/user/Bibletime/Films/adam-to-solomon/tools/capture.mjs:106:15
+log: logs/make-stills.log

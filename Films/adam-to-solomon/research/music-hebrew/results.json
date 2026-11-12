@@ -1,0 +1,71 @@
+{
+ "query": "hebrew",
+ "type": "music",
+ "results": [
+  {
+   "source": "archive",
+   "id": "jamendo-128085",
+   "title": "Dust Harvesting - \u041e\u0437\u0435\u0440\u043e \u0418\u0437\u0444\u0438\u043a\u0446\u0438\u0438 (Instrumental)",
+   "creator": "Dust Harvesting",
+   "licence": "cc-by",
+   "page": "https://archive.org/details/jamendo-128085",
+   "file": "https://archive.org/download/jamendo-128085/01-1075366-Dust%20Harvesting-_______%20___%20_____%20__%20_______.mp3",
+   "thumb": null,
+   "type": "music",
+   "licence_url": "http://creativecommons.org/licenses/by/3.0/",
+   "n": 1
+  },
+  {
+   "source": "archive",
+   "id": "jamendo-128274",
+   "title": "Dust Harvesting - Unquintessence (Instrumental)",
+   "creator": "Dust Harvesting",
+   "licence": "cc-by",
+   "page": "https://archive.org/details/jamendo-128274",
+   "file": "https://archive.org/download/jamendo-128274/01-1076924-Dust%20Harvesting-Stasis.mp3",
+   "thumb": null,
+   "type": "music",
+   "licence_url": "http://creativecommons.org/licenses/by/3.0/",
+   "n": 2
+  },
+  {
+   "source": "archive",
+   "id": "hr090",
+   "title": "Hydra feat. Stereorent - Improvisions",
+   "creator": "Hydra feat Stereorent",
+   "licence": "cc0",
+   "page": "https://archive.org/details/hr090",
+   "file": "https://archive.org/download/hr090/hr090_improvisions_01_on.mp3",
+   "thumb": null,
+   "type": "music",
+   "licence_url": "http://creativecommons.org/publicdomain/zero/1.0/",
+   "n": 3
+  },
+  {
+   "source": "archive",
+   "id": "junglemessiah3",
+   "title": "Jungle Messiah III",
+   "creator": "Digi Hartatak",
+   "licence": "cc-by",
+   "page": "https://archive.org/details/junglemessiah3",
+   "file": "https://archive.org/download/junglemessiah3/JungleMessiah3.mp3",
+   "thumb": null,
+   "type": "music",
+   "licence_url": "http://creativecommons.org/licenses/by/3.0/",
+   "n": 4
+  },
+  {
+   "source": "archive",
+   "id": "brainwithgtybeaniewinny",
+   "title": "Brain with G-TY Beanie Winny February 2014",
+   "creator": "Brain with G",
+   "licence": "pd",
+   "page": "https://archive.org/details/brainwithgtybeaniewinny",
+   "file": "https://archive.org/download/brainwithgtybeaniewinny/TY%20Beanie%20Winny.mp3",
+   "thumb": null,
+   "type": "music",
+   "licence_url": "http://creativecommons.org/publicdomain/mark/1.0/",
+   "n": 5
+  }
+ ]
+}
