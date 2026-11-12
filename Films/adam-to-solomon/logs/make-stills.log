@@ -1,16 +1,16 @@
-# make.py stills · 2026-11-12 16:42:18
+# make.py stills · 2026-11-12 16:53:31
 
 $ node /home/user/Bibletime/Films/adam-to-solomon/tools/capture.mjs --url film.html --probe --params w=1920&h=1080
 [capture] renderer: canvas2d
 [capture] qc: text: cap height 31 px < 40 px for phone viewing at 1920x1080
 [capture] page: 1920x1080, 4320 frames @ 24 fps
-[capture] meta: {"title":"From a Garden to a Temple","bounds":[0,16,32,46,64,80,90,102,118,134,156,180],"vo":0,"palette":{"bg":"#EADDBB","ink":"#231C16","accent":"#B5341F","dim":"#8E7B5A","blue":"#1F4E79","green":"#3E7A5E","gold":"#D9A21B"},"lookPalette":{"bg":"#EADDBB","ink":"#231C16","accent":"#B5341F","dim":"#8E7B5A","blue":"#1F4E79","green":"#3E7A5E","gold":"#D9A21B"},"families":["Cinzel","Old Standard TT"],"sfx":[]}
+[capture] meta: {"title":"From a Garden to a Temple","bounds":[0,16,32,46,64,80,90,102,118,134,156,180],"vo":0,"palette":{"bg":"#f28a3c","ink":"#0b0710","accent":"#ff5038","dim":"#3a2a44","blue":"#27406b","green":"#16301f","gold":"#ffcf6a"},"lookPalette":{"bg":"#f28a3c","ink":"#0b0710","accent":"#ff5038","dim":"#3a2a44","blue":"#27406b","green":"#16301f","gold":"#ffcf6a"},"families":["Cinzel","Old Standard TT"],"sfx":[]}
 
-$ node /home/user/Bibletime/Films/adam-to-solomon/tools/capture.mjs --url film.html --out /home/user/Bibletime/Films/adam-to-solomon/review/stills-10 --frames 156,250,2232,2340 --format jpeg --quality 0.9 --params w=960&h=540
+$ node /home/user/Bibletime/Films/adam-to-solomon/tools/capture.mjs --url film.html --out /home/user/Bibletime/Films/adam-to-solomon/review/stills-13 --frames 156,648,1020,1296,1824,2112,2340,2628,2950,3528,3984,4284 --format jpeg --quality 0.9 --params w=960&h=540
 [capture] renderer: canvas2d
 [capture] qc: text: cap height 16 px < 20 px for phone viewing at 960x540
 [capture] page: 960x540, 4320 frames @ 24 fps
-[capture] done: 4 rendered, 0 skipped, 1.2 s total, 3.47 fps, 1 worker(s)
-[capture] frames: /home/user/Bibletime/Films/adam-to-solomon/review/stills-10/%06d.jpg
+[capture] done: 12 rendered, 0 skipped, 1.4 s total, 8.71 fps, 1 worker(s)
+[capture] frames: /home/user/Bibletime/Films/adam-to-solomon/review/stills-13/%06d.jpg
 
-$ ffmpeg -hide_banner -nostdin -loglevel error -y -f concat -safe 0 -i /home/user/Bibletime/Films/adam-to-solomon/review/stills-10/frames.txt -vf scale=508:-2,pad=512:ih+4:2:2:black,tile=2x2 -frames:v 1 -update 1 -q:v 4 /home/user/Bibletime/Films/adam-to-solomon/review/stills-10.jpg
+$ ffmpeg -hide_banner -nostdin -loglevel error -y -f concat -safe 0 -i /home/user/Bibletime/Films/adam-to-solomon/review/stills-13/frames.txt -vf scale=337:-2,pad=341:ih+4:2:2:black,tile=3x4 -frames:v 1 -update 1 -q:v 4 /home/user/Bibletime/Films/adam-to-solomon/review/stills-13.jpg

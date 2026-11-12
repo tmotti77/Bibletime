@@ -43,11 +43,11 @@ const PURPOSE = 'cinematic';
 // mortar between, cream ground, lapis, terracotta, green and gold, words cut into stone plaques, and one row of red
 // stones running through every scene. Drawings hold on twos, so the stones settle instead of shimmering.
 const LOOKS = {
-  'stone-mosaic': { grade: 'contrast(1.06) saturate(1.22)', bloom: 0, texture: null, vignette: 0.24, grain: 0.035, grainHold: Infinity, hold: 12, line: 0.004, steps: 0,
-    palette: { bg: '#EADDBB', ink: '#231C16', accent: '#B5341F', dim: '#8E7B5A', blue: '#1F4E79', green: '#3E7A5E', gold: '#D9A21B' } },
+  'sunset-silhouette': { grade: 'contrast(1.05) saturate(1.12)', bloom: 0.12, texture: null, vignette: 0.5, grain: 0.05, grainHold: 1, hold: 24, line: 0, steps: 0,
+    palette: { bg: '#f28a3c', ink: '#0b0710', accent: '#ff5038', dim: '#3a2a44', blue: '#27406b', green: '#16301f', gold: '#ffcf6a' } },
 };
-const LOOK_ID = new URLSearchParams(location.search).get('look') || 'stone-mosaic';
-const LOOK = LOOKS[LOOK_ID] ?? LOOKS['stone-mosaic'];
+const LOOK_ID = new URLSearchParams(location.search).get('look') || 'sunset-silhouette';
+const LOOK = LOOKS[LOOK_ID] ?? LOOKS['sunset-silhouette'];
 const FINISH = { shutter: null, weave: 0, tone: null };
 const FPS = 24;
 const DURATION = 180;                       // seconds; the picture and the sound both follow this
@@ -100,123 +100,136 @@ const ARRANGEMENT = [
 ];
 
 
-// A drawn line; thin marks are thickened so they hold a row of tesserae.
+// ------------------------------ the silhouette kit ------------------------------
+// Every chapter has its own painted sky; everything in front of it is a silhouette lit from behind.
+const MOODS = {
+  1: { sky: ['#1b1440', '#5b2a6e', '#c2456a', '#f28a3c', '#ffd98a'], sun: [0.34, 0.66], far: '#7a3a6c', mid: '#3a1c44' },
+  2: { sky: ['#0c1420', '#1d2a3a', '#3a4a58', '#62727c', '#98a2a6'], sun: null, far: '#2c3a48', mid: '#18222c' },
+  3: { sky: ['#2a0f1a', '#7a2a1e', '#c8552a', '#f0a040', '#ffe0a0'], sun: [0.72, 0.7], far: '#8a3a2a', mid: '#4a1c18' },
+  4: { sky: ['#141a44', '#3a3a7a', '#8a4a7a', '#e08a5a', '#ffd9a0'], sun: null, far: '#3a2f5a', mid: '#1c1830' },
+  5: { sky: ['#3a2410', '#a8641e', '#e8a23a', '#ffd27a', '#fff0c0'], sun: [0.62, 0.52], far: '#8a5424', mid: '#5a3416' },
+  6: { sky: ['#0a1a2a', '#14404e', '#2f7a7a', '#e0b070', '#fff0c0'], sun: null, far: '#1f4a54', mid: '#102a32' },
+  7: { sky: ['#1a0a14', '#4a1420', '#9a2a22', '#e0602a', '#ffb060'], sun: [0.2, 0.72], far: '#5a1e24', mid: '#2a0e14' },
+  8: { sky: ['#0a0608', '#2a0c0c', '#5a1a12', '#a0401a', '#e08a3a'], sun: null, far: '#2a1010', mid: '#160808' },
+  9: { sky: ['#2a1a3a', '#8a4a5a', '#e08a4a', '#ffc870', '#fff0c0'], sun: [0.76, 0.6], far: '#8a4a4a', mid: '#44242c' },
+  10: { sky: ['#101838', '#3a3a78', '#b0608a', '#f0a070', '#ffe0b0'], sun: [0.24, 0.68], far: '#5a3a6a', mid: '#2a1c38' },
+  11: { sky: ['#3a1a08', '#a85a12', '#f0a428', '#ffd870', '#fff6d0'], sun: [0.5, 0.62], far: '#a8662a', mid: '#5a3210' },
+};
+let MOOD = MOODS[1];
+const SIL = '#0b0710';
 function stroke(g, pts, w, color, k = 1, alpha = 1) {
   if (k <= 0 || pts.length < 2) return;
-  const n = (pts.length - 1) * clamp(k), full = Math.floor(n), f = n - full;
-  g.save(); g.globalAlpha *= alpha; g.strokeStyle = color; g.lineWidth = Math.max(w, 0.0045); g.lineCap = 'round'; g.lineJoin = 'round';
+  const n = (pts.length - 1) * clamp(k), full = Math.floor(n), f = n - full, lit = color === PALETTE.accent || color === STARLIGHT || color === PALETTE.gold;
+  g.save(); g.globalAlpha *= alpha; g.strokeStyle = color; g.lineWidth = Math.max(w, 0.003); g.lineCap = 'round'; g.lineJoin = 'round';
+  if (lit) { g.shadowColor = color; g.shadowBlur = S.u * 0.014; }
   g.beginPath(); g.moveTo(pts[0][0], pts[0][1]);
   for (let i = 1; i <= full; i++) g.lineTo(pts[i][0], pts[i][1]);
   if (f > 0 && full + 1 < pts.length) g.lineTo(lerp(pts[full][0], pts[full + 1][0], f), lerp(pts[full][1], pts[full + 1][1], f));
   g.stroke(); g.restore();
 }
-// Shade inside a path: in mosaic a darker run of the same stones, never ruled lines.
-function hatch(g, path, o = {}) {
-  const { alpha = 0.7, k = 1, cross = false, color = PALETTE.ink } = o;
-  if (k <= 0 || alpha <= 0) return;
-  g.save(); g.beginPath(); path(g); g.globalAlpha *= alpha * (cross ? 0.34 : 0.17) * clamp(k); g.fillStyle = color; g.fill(); g.restore();
-}
-// A field of coloured stones laid over the ground colour.
-function wash(g, path, color, alpha = 0.55, off = 0.006) {
+function hatch() {}                                   // no ruled shading in this look: light and haze do that work
+// Colour in this look: a strong wash is light (a sun, fire, gold), a weak one a tint inside the shadow; blue is water.
+function wash(g, path, color, alpha = 0.55) {
   if (alpha <= 0) return;
-  g.save(); g.globalAlpha *= Math.min(1, alpha * 2); g.beginPath(); path(g); g.fillStyle = color; g.fill(); g.restore();
+  g.save(); g.beginPath(); path(g);
+  if (color === NIGHT) { g.globalAlpha *= Math.min(1, alpha * 1.15); g.fillStyle = '#080c24'; }
+  else if (color === PALETTE.green) { g.globalAlpha *= Math.min(1, alpha * 2.4); g.fillStyle = SIL; }
+  else if (color === PALETTE.dim) { g.globalAlpha *= Math.min(1, alpha * 2); g.fillStyle = MOOD.mid; }
+  else if (color === PALETTE.gold || color === PALETTE.accent) { g.globalAlpha *= alpha > 0.5 ? Math.min(1, alpha * 1.2) : alpha * 0.4; g.fillStyle = color; }
+  else { g.globalAlpha *= 0.94; g.fillStyle = '#101c30'; }
+  g.fill(); g.restore();
 }
-// The floor behind every scene: cream stones with slow changes of tone, as in a laid pavement.
-function chartPaper(g, S, cam, col = 0, half = 2.2) {
-  plane(g, S, cam, 0.5, (g) => {
-    const a = cam.x - half, b = cam.x + half;
-    for (let c = Math.floor(a); c < b; c++) for (let j = 0; j < 4; j++) {
-      const n = c * 31 + j * 7 + col * 101 + 5000, fx = c + hash1(n), fy = hash1(n + 1) * 1.6 - 0.8, fr = 0.12 + hash1(n + 2) * 0.3;
-      const gr = g.createRadialGradient(fx, fy, 0, fx, fy, fr), tone = j % 2 ? '120,90,50' : '255,246,220'; gr.addColorStop(0, `rgba(${tone},0.2)`); gr.addColorStop(1, `rgba(${tone},0)`);
-      g.fillStyle = gr; g.fillRect(fx - fr, fy - fr, 2 * fr, 2 * fr);
-    }
-  });
+// The sky behind every scene, in screen space: the chapter's gradient, its sun, long clouds that drift with the camera.
+function chartPaper(g, S, cam, col = 1) {
+  MOOD = MOODS[col] ?? MOODS[1];
+  g.save(); g.setTransform(1, 0, 0, 1, 0, 0);
+  const sk = g.createLinearGradient(0, 0, 0, S.H * 0.8); MOOD.sky.forEach((c, i) => sk.addColorStop([0, 0.3, 0.55, 0.78, 1][i], c)); g.fillStyle = sk; g.fillRect(0, 0, S.W, S.H);
+  if (MOOD.sun) {
+    const sx = MOOD.sun[0] * S.W - cam.x * S.u * 0.05, sy = MOOD.sun[1] * S.H, gl = g.createRadialGradient(sx, sy, 0, sx, sy, S.u * 0.75);
+    gl.addColorStop(0, 'rgba(255,244,200,0.95)'); gl.addColorStop(0.12, 'rgba(255,214,130,0.7)'); gl.addColorStop(0.45, 'rgba(255,150,80,0.2)'); gl.addColorStop(1, 'rgba(255,120,80,0)');
+    g.fillStyle = gl; g.fillRect(0, 0, S.W, S.H); g.fillStyle = '#fff6d8'; g.beginPath(); g.arc(sx, sy, S.u * 0.085, 0, TAU); g.fill();
+  }
+  for (let i = 0; i < 13; i++) {
+    const n = col * 211 + i * 17, span = S.W * 1.6, cx = ((hash1(n) * span - cam.x * S.u * (0.1 + 0.12 * hash1(n + 3))) % span + span) % span - S.W * 0.3, cy = (0.08 + hash1(n + 1) * 0.5) * S.H, cw = (0.1 + hash1(n + 2) * 0.26) * S.W, ch = (0.008 + hash1(n + 4) * 0.02) * S.H;
+    const cg = g.createLinearGradient(0, cy - ch, 0, cy + ch); cg.addColorStop(0, 'rgba(20,10,30,0.5)'); cg.addColorStop(1, 'rgba(255,190,130,0.45)');
+    g.fillStyle = cg; g.beginPath(); g.ellipse(cx, cy, cw, ch, 0, 0, TAU); g.fill();
+  }
+  g.restore();
 }
-// The red line: one row of red stones through every scene.
-function lineage(g, x0, x1, y, w = 0.012) {
+function lineage(g, x0, x1, y, w = 0.006) {
   if (x1 <= x0) return;
-  stroke(g, [[x0, y], [x1, y]], Math.max(w, 0.012), PALETTE.accent);
+  stroke(g, [[x0, y], [x1, y]], Math.max(w, 0.006), PALETTE.accent);
 }
-function nib(g, x, y, r = 0.012) { g.save(); g.fillStyle = PALETTE.accent; g.beginPath(); g.arc(x, y, Math.max(0, r), 0, TAU); g.fill(); g.restore(); }
-// A figure as the old floors show them: a robe of one colour, a dark outline, a face in profile.
-const ROBES = ['#1F4E79', '#A8432A', '#3E7A5E', '#7A5C3A', '#F3EAD3', '#5B3A6B'], SKIN = '#B98A5E';
+function nib(g, x, y, r = 0.009) { g.save(); g.shadowColor = PALETTE.accent; g.shadowBlur = S.u * 0.03; g.fillStyle = '#ff7a5c'; g.beginPath(); g.arc(x, y, Math.max(0, r), 0, TAU); g.fill(); g.restore(); }
+// A person as a silhouette with real proportions: legs, torso, neck, head, two arms. Returns the near hand.
 function person(g, x, y, h, o = {}) {
-  const f = o.face ?? 1, lean = (o.lean ?? 0) * f, hw = h * 0.2, top = y - h * 0.8, sw = Math.sin((o.p ?? 0) * TAU) * h * 0.035;
-  const lx = lean * h, robe = o.wash ?? ROBES[(o.salt ?? 3) % ROBES.length];
-  const body = (g) => {
-    g.moveTo(x - hw + sw, y); g.quadraticCurveTo(x - hw * 0.95 + lx * 0.5, y - h * 0.5, x - hw * 0.55 + lx, top);
-    g.lineTo(x + hw * 0.55 + lx, top); g.quadraticCurveTo(x + hw * 0.95 + lx * 0.5, y - h * 0.5, x + hw - sw, y); g.closePath();
-  };
-  g.save();
-  const a0 = g.globalAlpha, cl = o.hatch ?? 1;
-  g.fillStyle = SKIN; g.beginPath(); body(g); g.fill();
-  g.globalAlpha = a0 * cl; g.fillStyle = robe; g.beginPath(); body(g); g.fill(); g.globalAlpha = a0;
-  g.strokeStyle = PALETTE.ink; g.lineWidth = Math.max(h * 0.07, 0.009); g.lineJoin = 'round'; g.lineCap = 'round';
-  g.beginPath(); body(g); g.stroke();
-  const hx = x + lx * 1.25 + f * h * 0.015, hy = top - h * 0.11, hr = h * 0.115;
-  g.beginPath(); g.arc(hx, hy, hr, 0, TAU); g.fillStyle = o.back ? PALETTE.ink : '#D9AE82'; g.fill(); g.stroke();
-  if (!o.back) { g.beginPath(); g.fillStyle = PALETTE.ink; g.arc(hx, hy, hr, f > 0 ? Math.PI * 0.6 : -Math.PI * 0.4, f > 0 ? Math.PI * 1.6 : Math.PI * 0.4); g.fill(); }
-  const a = lerp(1.25, -1.1, o.arm ?? 0), sx = x + f * hw * 0.35 + lx, sy = top + h * 0.09;
-  const hand = [sx + f * Math.cos(a) * h * 0.34, sy + Math.sin(a) * h * 0.34];
-  g.strokeStyle = PALETTE.ink; g.lineWidth = Math.max(h * 0.075, 0.006); g.beginPath(); g.moveTo(sx, sy); g.lineTo(hand[0], hand[1]); g.stroke();
-  g.strokeStyle = SKIN; g.lineWidth = Math.max(h * 0.04, 0.003); g.beginPath(); g.moveTo(sx, sy); g.lineTo(hand[0], hand[1]); g.stroke();
-  if (o.staff) { g.strokeStyle = PALETTE.ink; g.lineWidth = Math.max(h * 0.035, 0.005); g.beginPath(); g.moveTo(hand[0], hand[1] - h * 0.42); g.lineTo(hand[0], Math.min(y, hand[1] + h * 0.7)); g.stroke(); }
+  const f = o.face ?? 1, u = h / 8, lean = (o.lean ?? 0) * f * h * 0.9, st = Math.sin((o.p ?? 0) * TAU) * u * 0.7, hipY = y - u * 3.9, shY = y - u * 6.2 + Math.abs(lean) * 0.25, sx0 = x + lean;
+  g.save(); g.fillStyle = SIL; g.strokeStyle = SIL; g.lineCap = 'round'; g.lineJoin = 'round';
+  if (o.long !== false && !o.legs) {                  // a robe: one long shape from the shoulders to the feet
+    g.beginPath(); g.moveTo(sx0 - u * 0.95, shY); g.quadraticCurveTo(sx0, shY - u * 0.45, sx0 + u * 0.95, shY); g.quadraticCurveTo(x + u * 1.05, y - u * 2.5, x + u * 1.15 + st * 0.4, y); g.lineTo(x - u * 1.15 + st * 0.4, y); g.quadraticCurveTo(x - u * 1.05, y - u * 2.5, sx0 - u * 0.95, shY); g.fill();
+    g.lineWidth = u * 0.6; for (const s of [-1, 1]) { g.beginPath(); g.moveTo(x + s * u * 0.4, y - u * 0.4); g.lineTo(x + s * u * 0.45 + s * st, y + u * 0.02); g.stroke(); }
+  } else {
+    g.lineWidth = u * 0.85; for (const s of [-1, 1]) { g.beginPath(); g.moveTo(x + s * u * 0.4, hipY); g.lineTo(x + s * (u * 0.5 + st * 0.5), y - u * 2); g.lineTo(x + s * u * 0.5 + s * st, y); g.stroke(); }
+    g.beginPath(); g.moveTo(sx0 - u * 0.95, shY); g.quadraticCurveTo(sx0, shY - u * 0.4, sx0 + u * 0.95, shY); g.lineTo(x + u * 0.75, hipY + u * 0.2); g.lineTo(x - u * 0.75, hipY + u * 0.2); g.closePath(); g.fill();
+  }
+  g.lineWidth = u * 0.5;
+  const arm = (side, a) => { const ax = sx0 + side * u * 0.85, ay = shY + u * 0.15, ex = ax + Math.sin(a) * u * 1.45 * f, ey = ay + Math.cos(a) * u * 1.45, hx = ex + Math.sin(a * 1.12) * u * 1.4 * f, hy = ey + Math.cos(a * 1.12) * u * 1.4; g.beginPath(); g.moveTo(ax, ay); g.lineTo(ex, ey); g.lineTo(hx, hy); g.stroke(); return [hx, hy]; };
+  arm(-f, 0.1 - st * 0.1); const hand = arm(f, lerp(0.15, 2.5, o.arm ?? 0));
+  const hx = sx0 + lean * 0.3 + f * u * 0.08, hy = shY - u * 1.1;
+  g.fillRect(sx0 + lean * 0.15 - u * 0.2, shY - u * 0.75, u * 0.4, u * 0.7);
+  g.beginPath(); g.ellipse(hx, hy, u * 0.55, u * 0.62, 0, 0, TAU); g.fill();
+  if ((o.salt ?? 0) % 3 === 0) { g.beginPath(); g.moveTo(hx - f * u * 0.6, hy - u * 0.2); g.quadraticCurveTo(hx - f * u * 1.1, hy + u * 1.4, hx - f * u * 0.5, hy + u * 2.2); g.lineTo(hx, hy + u * 0.6); g.closePath(); g.fill(); }     // long hair or a head cloth
+  if (o.staff) { g.lineWidth = u * 0.22; g.beginPath(); g.moveTo(hand[0], hand[1] - u * 3.4); g.lineTo(hand[0], Math.min(y, hand[1] + u * 5.6)); g.stroke(); }
   g.restore();
   return hand;
 }
-// Words are cut into stone plaques laid over the mosaic; they are queued here and drawn after the stones are set.
+// Ground whose top edge is y = f(x). Far ground is haze, mountains are a middle tone, near ground is black with grass.
+function land(g, f, x0, x1, bottom, o = {}) {
+  const far = (o.ang ?? 0.3) < 0.2, mid = !!o.cross;
+  g.save(); g.fillStyle = far ? MOOD.far : mid ? MOOD.mid : SIL; g.beginPath(); g.moveTo(x0, bottom);
+  for (let x = x0; x <= x1 + 1e-6; x += 0.03) g.lineTo(x, f(x));
+  g.lineTo(x1, bottom); g.closePath(); g.fill();
+  if (!far && !mid && o.fill !== false) { g.strokeStyle = SIL; g.lineWidth = 0.0026; g.lineCap = 'round'; g.beginPath(); for (let i = Math.ceil(x0 / 0.011); i * 0.011 < x1; i++) { const x = i * 0.011 + (hash1(i * 7 + 3) - 0.5) * 0.008, hh = 0.008 + 0.026 * hash1(i * 13 + 1), y = f(x); g.moveTo(x, y + 0.004); g.quadraticCurveTo(x + (hash1(i) - 0.5) * 0.01, y - hh * 0.5, x + (hash1(i + 9) - 0.5) * 0.022, y - hh); } g.stroke(); }
+  g.restore();
+}
+// A cut stone or a brick: black against the sky, its joints caught by the light; gold when the gold comes.
+function block(g, x, y, w, h, salt = 1, o = {}) {
+  g.fillStyle = SIL; g.fillRect(x, y, w, h);
+  if ((o.wash === PALETTE.gold || o.wash === PALETTE.accent) && (o.washA ?? 0.5) > 0.5) { g.save(); g.globalAlpha *= Math.min(1, ((o.washA ?? 0.5) - 0.5) * 2.4); g.fillStyle = o.wash === PALETTE.gold ? '#ffc94a' : o.wash; g.fillRect(x, y, w, h); g.restore(); }
+  g.strokeStyle = 'rgba(255,200,140,0.22)'; g.lineWidth = 0.0014; g.strokeRect(x, y, w, h);
+}
+// Light on water: rows of glints.
+function waves(g, x0, x1, y0, y1, t, rows, salt = 0) {
+  g.save(); g.strokeStyle = MOOD.sky[4]; g.lineCap = 'round';
+  for (let j = 0; j <= rows; j++) {
+    const d = j / rows, y = lerp(y0, y1, d ** 1.4), amp = 0.003 + 0.007 * d, fr = 24 - 11 * d, ph = hash1(900 + salt + j) * 6;
+    g.lineWidth = 0.0018 + 0.003 * d; g.globalAlpha = 0.16 + 0.3 * hash1(950 + salt + j); g.beginPath();
+    for (let x = x0; x <= x1; x += 0.014) { const yy = y + amp * Math.sin(x * fr + t * (0.6 + d) + ph) + amp * 0.5 * Math.sin(x * fr * 2.3 - t + ph), on = Math.sin(x * 9 + j * 2.3 + t * 0.7) > -0.2; if (!on || x === x0) g.moveTo(x, yy); else g.lineTo(x, yy); }
+    g.stroke();
+  }
+  g.restore();
+}
+// Words sit in the black bars of the frame: the line of the film below, the place and the book above.
 const OVER = [];
-function plaque(g, S, str, x, y, size, a, align = 'center') {
-  g.save(); g.setTransform(S.u / 100, 0, 0, S.u / 100, S.W / 2, S.H / 2); g.globalAlpha = a;
-  setType(g, TYPE, 'display', size * 100, { short: 100, weight: 700, track: 0.08 }); g.textBaseline = 'alphabetic'; g.textAlign = 'left';
-  const m = g.measureText(str), w = m.width, cap = size * 100 * 0.7, px = size * 100 * 0.75, py = size * 100 * 0.6, X = align === 'center' ? x * 100 - w / 2 : x * 100, Y = y * 100 + cap / 2;
-  const bx = X - px, by = Y - cap - py, bw = w + 2 * px, bh = cap + 2 * py;
-  g.fillStyle = 'rgba(30,22,14,0.45)'; g.fillRect(bx + 0.5, by + 0.6, bw, bh);
-  const gr = g.createLinearGradient(0, by, 0, by + bh); gr.addColorStop(0, '#E6D6B0'); gr.addColorStop(1, '#CDB88C'); g.fillStyle = gr; g.fillRect(bx, by, bw, bh);
-  g.strokeStyle = '#F5EBD0'; g.lineWidth = 0.28; g.strokeRect(bx + 0.3, by + 0.3, bw - 0.6, bh - 0.6); g.strokeStyle = '#8E7B5A'; g.lineWidth = 0.18; g.strokeRect(bx + 0.75, by + 0.75, bw - 1.5, bh - 1.5);
-  g.fillStyle = '#FBF3DC'; g.fillText(str, X + 0.1, Y + 0.14); g.fillStyle = '#33261A'; g.fillText(str, X, Y);
-  g.restore();
+function barText(g, S, str, x, y, size, a, align, weight = 700) {
+  g.save(); g.setTransform(S.u / 100, 0, 0, S.u / 100, S.W / 2, S.H / 2); g.globalAlpha = a; setType(g, TYPE, 'display', size * 100, { short: 100, weight, track: 0.1 });
+  g.textAlign = align; g.textBaseline = 'middle'; g.fillStyle = '#f4e6c8'; g.fillText(str, x * 100, y * 100); g.restore();
 }
-function card(g, S, str, t, t0, t1, y = -0.385, size = 0.058, o = {}) {
-  const a = Math.min(MOTION.at(t, t0, 0.4), 1 - MOTION.at(t, t1 - 0.5, 0.5));
-  if (a <= 0) return;
-  const rise = 1 - EASE.out(MOTION.at(t, t0, 0.6));
-  OVER.push(() => plaque(g, S, up(str.replace(/\.$/, ''), 'en'), 0, (y < 0 ? -0.405 : 0.385) - (y < 0 ? 0.03 : -0.03) * rise, 0.04, clamp(a)));
-}
-function place(g, S, str, t, t0, t1, y = 0.45, color = PALETTE.ink) {
+function card(g, S, str, t, t0, t1) {
   const a = Math.min(MOTION.at(t, t0, 0.5), 1 - MOTION.at(t, t1 - 0.5, 0.5));
-  if (a <= 0) return;
-  OVER.push(() => plaque(g, S, str, -0.83, y < 0 ? -0.43 : 0.43, 0.026, clamp(a), 'left'));
+  if (a > 0) OVER.push(() => barText(g, S, up(str.replace(/\.$/, ''), 'en'), 0, 0.458, 0.036, clamp(a), 'center'));
 }
-// The whole picture is set in stones: the drawing is sampled on a grid of tesserae, each a little uneven in size,
-// place and tone, with mortar between; a border of triangles runs along the top and the bottom of the floor.
-const MORTAR = '#9C8B6C';
-let mz = null;
-function mosaic(g, S) {
-  const cell = Math.max(3, Math.round(S.u / 96)), cw = Math.ceil(S.W / cell) + 1, ch = Math.ceil(S.H / cell);
-  if (!mz || mz.c.width !== cw || mz.c.height !== ch) { const c = Object.assign(document.createElement('canvas'), { width: cw, height: ch }); mz = { c, g: c.getContext('2d', { willReadFrequently: true }) }; }
-  g.save(); g.setTransform(1, 0, 0, 1, 0, 0); g.globalAlpha = 1; g.filter = 'none'; g.globalCompositeOperation = 'source-over';
-  const bh = cell * 4, tri = cell * 4;                // the border, drawn before the stones are set
-  for (const y0 of [0, S.H - bh]) {
-    g.fillStyle = '#F1E6C8'; g.fillRect(0, y0, S.W, bh);
-    g.fillStyle = PALETTE.ink; g.fillRect(0, y0 === 0 ? bh - cell : y0, S.W, cell);
-    for (let i = 0; i * tri < S.W + tri; i++) { g.fillStyle = i % 2 ? PALETTE.accent : PALETTE.blue; g.beginPath(); if (y0 === 0) { g.moveTo(i * tri, 0); g.lineTo(i * tri + tri, 0); g.lineTo(i * tri + tri / 2, bh - cell); } else { g.moveTo(i * tri, S.H); g.lineTo(i * tri + tri, S.H); g.lineTo(i * tri + tri / 2, y0 + cell); } g.fill(); }
-  }
-  mz.g.imageSmoothingEnabled = true; mz.g.imageSmoothingQuality = 'high'; mz.g.drawImage(g.canvas, 0, 0, cw * cell, ch * cell, 0, 0, cw, ch);
-  const d = mz.g.getImageData(0, 0, cw, ch).data, gap = cell * 0.14, sz = cell - gap;
-  g.fillStyle = MORTAR; g.fillRect(0, 0, S.W, S.H);
-  for (let y = 0; y < ch; y++) {
-    const ro = (hash1(9000 + y) - 0.5) * cell * 0.6;
-    for (let x = 0; x < cw; x++) {
-      const i = (y * cw + x) * 4, h = hash1(y * 977 + x * 131 + 17), h2 = hash1(y * 613 + x * 419 + 5), j = 0.88 + 0.22 * h;
-      g.fillStyle = `rgb(${Math.min(255, d[i] * j) | 0},${Math.min(255, d[i + 1] * j) | 0},${Math.min(255, d[i + 2] * j) | 0})`;
-      const px = x * cell + ro + gap / 2 + (h2 - 0.5) * gap * 0.9, py = y * cell + gap / 2 + (h - 0.5) * gap * 0.9, w = sz * (0.92 + 0.12 * h2), hh = sz * (0.92 + 0.12 * h);
-      g.beginPath(); g.moveTo(px + w * 0.12 * h, py); g.lineTo(px + w, py + hh * 0.1 * h2); g.lineTo(px + w - w * 0.1 * h2, py + hh); g.lineTo(px, py + hh - hh * 0.12 * h); g.closePath(); g.fill();
-    }
-  }
-  g.restore();
+function place(g, S, str, t, t0, t1) {
+  const a = Math.min(MOTION.at(t, t0, 0.5), 1 - MOTION.at(t, t1 - 0.5, 0.5));
+  if (a > 0) OVER.push(() => barText(g, S, str, -0.84, -0.462, 0.027, clamp(a) * 0.9, 'left', 400));
 }
-function M(fn) { return (g, k, t, S) => { OVER.length = 0; fn(g, k, t, S); mosaic(g, S); for (const f of OVER) f(); OVER.length = 0; }; }
+function M(fn) {
+  return (g, k, t, S) => {
+    OVER.length = 0; fn(g, k, t, S);
+    g.save(); g.setTransform(1, 0, 0, 1, 0, 0); g.globalAlpha = 1; g.fillStyle = '#000'; const bar = Math.round(S.H * 0.075); g.fillRect(0, 0, S.W, bar); g.fillRect(0, S.H - bar, S.W, bar); g.restore();
+    for (const f of OVER) f(); OVER.length = 0;
+  };
+}
 
 // ------------------------------ C1 Eden ------------------------------
 const GY = 0.28;                                     // the height of the lineage line on every plate
@@ -241,9 +254,10 @@ function c1_eden(g, k, t, S) {
   const growK = EASE.out(A(t, CUES.treeUp, 3.8)), leafK = EASE.out(A(t, 4.4, 2.6)), drain = EASE.inOut(A(t, 11.3, 2.6)), colour = leafK * (1 - drain);
   const { segs, tips } = edenTree();
   chartPaper(g, S, cam, 1);
+  if (drain > 0) { g.save(); g.setTransform(1, 0, 0, 1, 0, 0); g.fillStyle = `rgba(22,16,44,${0.6 * drain})`; g.fillRect(0, 0, S.W, S.H); g.restore(); }   // the garden's light goes out
   plane(g, S, cam, 0.28, (g) => {                     // far: the sun, the hills, the four rivers' first bend
     const sunK = EASE.out(A(t, 3.2, 2.5));
-    if (sunK > 0) {
+    if (false) {
       const sx = -0.62, sy = -0.3;
       wash(g, (g) => g.arc(sx, sy, 0.085, 0, TAU), PALETTE.gold, 0.55 * sunK * (1 - 0.7 * drain), 0.005);
       g.strokeStyle = PALETTE.ink; g.lineWidth = 0.0022; g.beginPath(); g.arc(sx, sy, 0.085, 0, TAU * sunK); g.stroke();
@@ -253,7 +267,7 @@ function c1_eden(g, k, t, S) {
     }
     const hills = (g) => { g.moveTo(-1.6, 0.36); for (let x = -1.6; x <= 3.2; x += 0.04) g.lineTo(x, 0.2 - 0.07 * Math.sin(x * 2.3 + 1) - 0.035 * Math.sin(x * 5.1)); g.lineTo(3.2, 0.36); g.closePath(); };
     const hk = EASE.out(A(t, 2.2, 2.4));
-    wash(g, hills, PALETTE.green, 0.4 * colour);
+    g.save(); g.fillStyle = MOOD.far; g.beginPath(); hills(g); g.fill(); g.restore();
     hatch(g, hills, { ang: 0.05, gap: 0.011, w: 0.0013, alpha: 0.55, box: [-1.6, 0.05, 3.2, 0.4], k: hk, salt: 7 });
     g.strokeStyle = PALETTE.ink; g.lineWidth = 0.002; g.globalAlpha = hk; g.beginPath();
     for (let x = -1.6; x <= 3.2; x += 0.04) g.lineTo(x, 0.2 - 0.07 * Math.sin(x * 2.3 + 1) - 0.035 * Math.sin(x * 5.1));
@@ -267,7 +281,7 @@ function c1_eden(g, k, t, S) {
   plane(g, S, cam, 0, (g) => {
     const ground = (g) => { g.moveTo(-2.2, GY); for (let x = -2.2; x <= 3.4; x += 0.05) g.lineTo(x, GY + 0.006 * Math.sin(x * 14)); g.lineTo(3.4, 0.62); g.lineTo(-2.2, 0.62); g.closePath(); };
     const gk = EASE.out(A(t, 2.4, 2.2));
-    wash(g, ground, PALETTE.green, 0.5 * colour);
+    g.save(); g.fillStyle = SIL; g.beginPath(); ground(g); g.fill(); g.restore();
     hatch(g, ground, { ang: 0.42, gap: 0.013, w: 0.0014, alpha: 0.5, box: [-2.2, GY, 3.4, 0.62], k: gk, salt: 11 });
     const r = rng(33);                                 // sprigs and reeds along the ground
     for (let i = 0; i < 46; i++) {
@@ -282,12 +296,12 @@ function c1_eden(g, k, t, S) {
       if (sk <= 0) continue;
       const pts = []; for (let i = 0; i <= 6; i++) { const u = i / 6; pts.push([lerp(s.x, s.x1, u) + Math.sin(u * 3.1 + s.d * 2) * s.w * 0.25, lerp(s.y, s.y1, u)]); }
       stroke(g, pts, s.w, PALETTE.ink, sk);
-      if (s.d < 3) stroke(g, pts, s.w * 0.42, PALETTE.bg, sk, 0.55);          // the lit side of the bark
+      if (s.d < 3) stroke(g, pts, s.w * 0.42, SIL, sk, 0.55);          // the lit side of the bark
       if (s.d < 2) stroke(g, pts, s.w * 0.16, PALETTE.accent, sk, 0.9);       // the red line still runs inside it
     }
     stroke(g, [[0.012, 0.13], [0.08, 0.075], [0.15, 0.045], [0.2, 0.04]], 0.008, PALETTE.ink, EASE.out(A(t, 4.2, 1.2)));   // the low branch
     // leaves: clusters at the tips; the wash is the garden's colour and it drains after the fruit is taken
-    wash(g, (g) => { for (const [x, y, q] of tips) { const lk = EASE.out(A(t, 4.4 + q * 2, 0.9)); if (lk > 0) { g.moveTo(x + 0.05 * lk, y); g.arc(x, y, 0.05 * lk, 0, TAU); } } }, PALETTE.green, 0.62 * colour, 0.005);
+    wash(g, (g) => { for (const [x, y, q] of tips) { const lk = EASE.out(A(t, 4.4 + q * 2, 0.9)) * (1 - EASE.in(A(t, 11.4 + q * 2.6, 2))); if (lk > 0) for (let j = 0; j < 4; j++) { const cx = x + (hash1(j * 7 + Math.round(q * 900)) - 0.5) * 0.07, cy = y + (hash1(j * 11 + Math.round(q * 700)) - 0.5) * 0.05, rr = (0.022 + 0.022 * hash1(j + Math.round(q * 500))) * lk; g.moveTo(cx + rr, cy); g.ellipse(cx, cy, rr * 1.3, rr, 0, 0, TAU); } } }, PALETTE.green, 1, 0);
     tips.forEach(([x, y, q], i) => {
       const lk = EASE.out(A(t, 4.4 + q * 2, 0.9));
       if (lk <= 0) return;
@@ -337,16 +351,16 @@ function c6_sea(g, k, t, S) {
   chartPaper(g, S, cam, 6);
   plane(g, S, cam, 0.3, (g) => {                      // far: a sky of ruled cloud, light breaking over the far shore
     hatch(g, (g) => g.rect(-1.6, -0.75, 3.2, 0.62 + HZ + 0.13), { ang: -0.22, gap: 0.014, w: 0.0015, alpha: 0.6, box: [-1.6, -0.75, 1.6, HZ + 0.02], salt: 14 });
-    g.save(); g.strokeStyle = PALETTE.bg; g.lineCap = 'round';
+    g.save(); g.strokeStyle = 'rgba(255,232,170,0.5)'; g.lineCap = 'round';
     for (let i = 0; i < 26; i++) {                     // rays cut out of the hatching, from where the path ends
       const a = -Math.PI / 2 + (i - 12.5) * 0.085, len = (0.35 + 0.5 * hash1(300 + i)) * open;
-      g.globalAlpha = 0.9; g.lineWidth = 0.012 + 0.012 * hash1(320 + i);
+      g.globalAlpha = 0.5; g.lineWidth = 0.008 + 0.01 * hash1(320 + i);
       g.beginPath(); g.moveTo(Math.cos(a) * 0.03, HZ - 0.02 + Math.sin(a) * 0.03); g.lineTo(Math.cos(a) * len, HZ - 0.02 + Math.sin(a) * len); g.stroke();
     }
     g.restore();
     wash(g, (g) => g.arc(0, HZ - 0.02, 0.3 * open, Math.PI, TAU), PALETTE.gold, 0.4 * open, 0.004);
     const far = (g) => { g.moveTo(-1.7, HZ + 0.03); for (let x = -1.7; x <= 1.7; x += 0.03) g.lineTo(x, HZ - 0.035 - 0.03 * Math.sin(x * 4 + 2) - 0.014 * Math.sin(x * 11)); g.lineTo(1.7, HZ + 0.03); g.closePath(); };
-    g.fillStyle = PALETTE.bg; g.beginPath(); far(g); g.fill();
+    g.fillStyle = SIL; g.beginPath(); far(g); g.fill();
     hatch(g, far, { ang: 1.2, gap: 0.006, w: 0.0012, alpha: 0.7, box: [-1.7, HZ - 0.1, 1.7, HZ + 0.03], salt: 15 });
   });
   plane(g, S, cam, 0, (g) => {
@@ -372,19 +386,19 @@ function c6_sea(g, k, t, S) {
       // the two walls: the cut face of the water, from the surface edge down to the seabed
       for (const sgn of [-1, 1]) {
         const wall = (g) => { g.moveTo(sgn * surfX(0), seaY(0)); for (let i = 1; i <= 20; i++) g.lineTo(sgn * surfX(i / 20), seaY(i / 20) - open * 0.035 * (i / 20)); for (let i = 20; i >= 0; i--) g.lineTo(sgn * bedX(i / 20), bedY(i / 20)); g.closePath(); };
-        g.fillStyle = PALETTE.bg; g.beginPath(); wall(g); g.fill();
+        g.fillStyle = SIL; g.beginPath(); wall(g); g.fill();
         wash(g, wall, PALETTE.blue, 0.85, 0.003);
         hatch(g, wall, { ang: Math.PI / 2 - sgn * 0.16, gap: 0.0075, w: 0.0016, alpha: 0.85, box: [-0.5, HZ, 0.5, 0.75], salt: 17 + sgn, cross: true });
         g.strokeStyle = PALETTE.ink; g.lineWidth = 0.0035; g.lineJoin = 'round'; g.beginPath();
         for (let i = 0; i <= 40; i++) { const d = i / 40, e = 0.006 * d * Math.sin(i * 1.7 + t * 2.2); g.lineTo(sgn * (surfX(d) + e), seaY(d) - open * 0.035 * d - Math.abs(e)); }
         g.stroke();
-        g.strokeStyle = PALETTE.bg; g.lineWidth = 0.004; g.beginPath();           // foam: a pale lip under the edge
+        g.strokeStyle = SIL; g.lineWidth = 0.004; g.beginPath();           // foam: a pale lip under the edge
         for (let i = 4; i <= 40; i++) { const d = i / 40; g.lineTo(sgn * (surfX(d) - 0.006 * d), seaY(d) - open * 0.035 * d + 0.008 * d); }
         g.stroke();
       }
       // the seabed: dry ground, stones, the long shadow of the walls
       const bed = (g) => { g.moveTo(-bedX(0), bedY(0)); for (let i = 1; i <= 20; i++) g.lineTo(-bedX(i / 20), bedY(i / 20)); for (let i = 20; i >= 0; i--) g.lineTo(bedX(i / 20), bedY(i / 20)); g.closePath(); };
-      g.fillStyle = PALETTE.bg; g.beginPath(); bed(g); g.fill();
+      g.fillStyle = SIL; g.beginPath(); bed(g); g.fill();
       wash(g, bed, PALETTE.gold, 0.22, 0.002);
       g.save(); g.beginPath(); bed(g); g.clip();
       for (const [sx, sd, sq] of seaStones()) {
@@ -413,7 +427,7 @@ function c6_sea(g, k, t, S) {
     for (const p of walkers) person(g, p.px, p.py, p.ph, { back: true, face: p.salt % 2 ? 1 : -1, arm: 0.1, p: p.w * 14 + p.salt * 0.3, salt: p.salt, wash: p.salt % 5 === 0 ? PALETTE.accent : p.salt % 3 === 0 ? PALETTE.blue : null, washA: 0.45 });
     // Moses: on a rock at the right, the staff goes up and the sea answers
     const rock = (g) => { g.moveTo(0.5, 0.56); g.lineTo(0.53, 0.44); g.lineTo(0.6, 0.405); g.lineTo(0.7, 0.42); g.lineTo(0.76, 0.56); g.closePath(); };
-    g.fillStyle = PALETTE.bg; g.beginPath(); rock(g); g.fill();
+    g.fillStyle = SIL; g.beginPath(); rock(g); g.fill();
     hatch(g, rock, { ang: 0.9, gap: 0.007, w: 0.0014, alpha: 0.8, box: [0.5, 0.4, 0.76, 0.56], salt: 29, cross: true });
     g.strokeStyle = PALETTE.ink; g.lineWidth = 0.003; g.beginPath(); rock(g); g.stroke();
     person(g, 0.62, 0.41, 0.2, { face: -1, arm: 0.25 + 0.75 * MOTION.back(A(tl, 2.6, 0.9), 1.2), staff: true, salt: 31, wash: PALETTE.dim, washA: 0.5 });
@@ -432,35 +446,6 @@ function c6_sea(g, k, t, S) {
 // ------------------------------ shared pieces of the plates ------------------------------
 const A = (t, start, dur) => clamp((t - start) / dur);
 const STARLIGHT = '#FBF3D8', NIGHT = '#33497A';
-// Ground whose top edge is y = f(x): paper, wash, hatching, contour.
-function land(g, f, x0, x1, bottom, o = {}) {
-  const shape = (g) => { g.moveTo(x0, bottom); for (let x = x0; x <= x1 + 1e-6; x += 0.03) g.lineTo(x, f(x)); g.lineTo(x1, bottom); g.closePath(); };
-  if (o.fill !== false) { g.fillStyle = PALETTE.bg; g.beginPath(); shape(g); g.fill(); }
-  if (o.wash) wash(g, shape, o.wash, o.washA ?? 0.4);
-  hatch(g, shape, { ang: o.ang ?? 0.3, gap: o.gap ?? 0.012, w: 0.0013, alpha: o.alpha ?? 0.5, box: [x0, -0.7, x1, bottom], k: o.k ?? 1, salt: o.salt ?? 1, cross: o.cross });
-  g.save(); g.strokeStyle = PALETTE.ink; g.lineWidth = o.lw ?? 0.0022; g.lineJoin = 'round'; g.beginPath();
-  for (let x = x0; x <= x1 + 1e-6; x += 0.03) g.lineTo(x, f(x));
-  g.stroke(); g.restore();
-}
-// An ashlar or a brick: x, y = its top-left corner.
-function block(g, x, y, w, h, salt = 1, o = {}) {
-  const p = (g) => g.rect(x, y, w, h);
-  g.fillStyle = PALETTE.bg; g.beginPath(); p(g); g.fill();
-  if (o.wash) wash(g, p, o.wash, o.washA ?? 0.5, 0.003);
-  if (o.hatch !== false) hatch(g, p, { ang: 0.9, gap: o.gap ?? 0.007, w: 0.001, alpha: 0.45, box: [x, y, x + w, y + h], salt });
-  g.strokeStyle = PALETTE.ink; g.lineWidth = o.lw ?? 0.002; g.strokeRect(x, y, w, h);
-}
-// Rows of engraved swell between two heights.
-function waves(g, x0, x1, y0, y1, t, rows, salt = 0) {
-  g.save(); g.strokeStyle = PALETTE.ink;
-  for (let j = 0; j <= rows; j++) {
-    const d = j / rows, y = lerp(y0, y1, d ** 1.4), amp = 0.003 + 0.008 * d, fr = 24 - 11 * d, ph = hash1(900 + salt + j) * 6;
-    g.lineWidth = 0.006 + 0.005 * d; g.strokeStyle = j % 2 ? '#9CC9D8' : '#173A5C'; g.globalAlpha = 0.9; g.beginPath();
-    for (let x = x0; x <= x1; x += 0.014) { const yy = y + amp * Math.sin(x * fr + t * (0.6 + d) + ph) + amp * 0.5 * Math.sin(x * fr * 2.3 - t + ph); if (x === x0) g.moveTo(x, yy); else g.lineTo(x, yy); }
-    g.stroke();
-  }
-  g.restore();
-}
 // Night laid over a plate: a blue-black wash and a second direction of hatching.
 function night(g, x0, y0, w, h, a, salt = 71) {
   if (a <= 0) return;
@@ -475,7 +460,7 @@ function ark(g, x, y, s, rock = 0) {                  // the ark, its waterline 
   const house = (g) => g.rect(-s * 0.6, -s * 0.62, s * 1.2, s * 0.36);
   const roof = (g) => { g.moveTo(-s * 0.7, -s * 0.62); g.lineTo(0, -s * 0.86); g.lineTo(s * 0.7, -s * 0.62); g.closePath(); };
   for (const [p, a, wsh] of [[house, 1.57, null], [roof, 0.5, PALETTE.accent], [hull, 0.02, PALETTE.gold]]) {
-    g.fillStyle = PALETTE.bg; g.beginPath(); p(g); g.fill(); if (wsh) wash(g, p, wsh, 0.45, 0.004);
+    g.fillStyle = SIL; g.beginPath(); p(g); g.fill(); if (wsh) wash(g, p, wsh, 0.45, 0.004);
     hatch(g, p, { ang: a, gap: s * 0.06, w: 0.0013, alpha: 0.7, box: [-s * 1.1, -s, s * 1.1, s * 0.3], salt: 41 });
     g.strokeStyle = PALETTE.ink; g.lineWidth = 0.003; g.lineJoin = 'round'; g.beginPath(); p(g); g.stroke();
   }
@@ -525,7 +510,7 @@ function c2_flood(g, k, t, S) {
     if (bow > 0) {
       const cx = 0.79, cy = GY + 0.12, a0 = Math.PI + 0.32, a1 = TAU - 0.153;
       [[PALETTE.blue, 0.725], [PALETTE.green, 0.75], [PALETTE.gold, 0.775]].forEach(([c, r], i) => {
-        g.save(); g.globalCompositeOperation = 'multiply'; g.globalAlpha = 0.6; g.strokeStyle = c; g.lineWidth = 0.024; g.beginPath(); g.arc(cx, cy, r, a0, lerp(a0, a1, clamp(bow * 1.15 - 0.05 * (3 - i)))); g.stroke(); g.restore();
+        g.save(); g.globalCompositeOperation = 'source-over'; g.globalAlpha = 0.6; g.strokeStyle = c; g.lineWidth = 0.024; g.beginPath(); g.arc(cx, cy, r, a0, lerp(a0, a1, clamp(bow * 1.15 - 0.05 * (3 - i)))); g.stroke(); g.restore();
       });
       g.save(); g.strokeStyle = PALETTE.accent; g.lineWidth = 0.008; g.lineCap = 'round'; g.beginPath(); g.arc(cx, cy, 0.8, a0, lerp(a0, a1, bow)); g.stroke(); g.restore();
       const ha = lerp(a0, a1, bow); if (bow < 1) nib(g, cx + Math.cos(ha) * 0.8, cy + Math.sin(ha) * 0.8);
@@ -636,7 +621,7 @@ function c4_abraham(g, k, t, S) {
       stroke(g, pts, 0.003, PALETTE.dim, 1, 0.65 * (1 - dusk));
     }
     const tent = (g) => { g.moveTo(0.02, GY); g.lineTo(0.22, GY - 0.2); g.lineTo(0.46, GY); g.closePath(); };
-    g.fillStyle = PALETTE.bg; g.beginPath(); tent(g); g.fill(); wash(g, tent, PALETTE.accent, 0.35);
+    g.fillStyle = SIL; g.beginPath(); tent(g); g.fill(); wash(g, tent, PALETTE.accent, 0.35);
     hatch(g, tent, { ang: 1.15, gap: 0.016, w: 0.0016, alpha: 0.8, box: [0, GY - 0.2, 0.46, GY], salt: 75 });
     g.strokeStyle = PALETTE.ink; g.lineWidth = 0.003; g.lineJoin = 'round'; g.beginPath(); tent(g); g.stroke();
     g.fillStyle = PALETTE.ink; g.beginPath(); g.moveTo(0.2, GY); g.lineTo(0.235, GY - 0.11); g.lineTo(0.27, GY); g.fill();
@@ -651,8 +636,8 @@ function c4_abraham(g, k, t, S) {
     const bx = 1.95;
     block(g, bx - 0.13, GY - 0.03, 0.07, 0.03, 77);
     const sl = (g) => { g.moveTo(bx - 0.07, GY); g.quadraticCurveTo(bx + 0.05, GY - 0.075, bx + 0.2, GY - 0.03); g.lineTo(bx + 0.24, GY); g.closePath(); };
-    g.fillStyle = PALETTE.bg; g.beginPath(); sl(g); g.fill(); wash(g, sl, PALETTE.green, 0.4); hatch(g, sl, { ang: 0.3, gap: 0.009, w: 0.0014, alpha: 0.8, box: [bx - 0.1, GY - 0.08, bx + 0.25, GY], salt: 78 });
-    g.strokeStyle = PALETTE.ink; g.lineWidth = 0.003; g.beginPath(); sl(g); g.stroke(); g.beginPath(); g.arc(bx - 0.095, GY - 0.047, 0.02, 0, TAU); g.fillStyle = PALETTE.bg; g.fill(); g.stroke();
+    g.fillStyle = SIL; g.beginPath(); sl(g); g.fill(); wash(g, sl, PALETTE.green, 0.4); hatch(g, sl, { ang: 0.3, gap: 0.009, w: 0.0014, alpha: 0.8, box: [bx - 0.1, GY - 0.08, bx + 0.25, GY], salt: 78 });
+    g.strokeStyle = PALETTE.ink; g.lineWidth = 0.003; g.beginPath(); sl(g); g.stroke(); g.beginPath(); g.arc(bx - 0.095, GY - 0.047, 0.02, 0, TAU); g.fillStyle = SIL; g.fill(); g.stroke();
     if (lad > 0) {
       const L0 = [bx + 0.05, GY - 0.06], L1 = [bx + 0.42, -0.92], P = (u, s) => [lerp(L0[0], L1[0], u) + s * (0.035 - 0.012 * u), lerp(L0[1], L1[1], u)];
       g.save(); g.fillStyle = 'rgba(201,154,46,0.3)'; g.beginPath(); g.moveTo(...P(0, -1.6)); g.lineTo(...P(lad, -3.4)); g.lineTo(...P(lad, 3.4)); g.lineTo(...P(0, 1.6)); g.closePath(); g.fill(); g.restore();
@@ -685,7 +670,7 @@ function glow(g, x, y, r, a, c = '201,154,46') {
 function pyramid(g, x, y, s, salt = 1) {             // base centre (x, y), s = half its base
   const lit = (g) => { g.moveTo(x - s, y); g.lineTo(x, y - s * 1.25); g.lineTo(x + s * 0.25, y); g.closePath(); };
   const dark = (g) => { g.moveTo(x + s * 0.25, y); g.lineTo(x, y - s * 1.25); g.lineTo(x + s, y); g.closePath(); };
-  g.fillStyle = PALETTE.bg; g.beginPath(); lit(g); dark(g); g.fill();
+  g.fillStyle = SIL; g.beginPath(); lit(g); dark(g); g.fill();
   wash(g, (g) => { lit(g); dark(g); }, PALETTE.gold, 0.4, 0.004);
   hatch(g, lit, { ang: 0.02, gap: s * 0.07, w: 0.0012, alpha: 0.5, box: [x - s, y - s * 1.3, x + s, y], salt });
   hatch(g, dark, { ang: 1.0, gap: s * 0.035, w: 0.0013, alpha: 0.8, box: [x - s, y - s * 1.3, x + s, y], salt: salt + 1, cross: true });
@@ -705,9 +690,8 @@ function c5_joseph(g, k, t, S) {
   const cam = CAM.base(); cam.x = lerp(-1.1, 0, run) + 0.95 * down + 0.75 * on + 1.3 * leave; cam.y = 0.74 * down; cam.dist = 1 + 0.06 * down;
   chartPaper(g, S, cam, 5);
   plane(g, S, cam, 0.28, (g) => {
-    land(g, (x) => 0.19 - 0.045 * Math.sin(x * 2 + 0.5) + 1.2 * EASE.inOut(clamp((x - 0.5) / 0.9)), -2.2, 1.5, 1.9, { ang: 0.08, gap: 0.012, salt: 91, wash: PALETTE.green, washA: 0.3 });
+    land(g, (x) => 0.19 - 0.045 * Math.sin(x * 2 + 0.5) + 1.2 * EASE.inOut(clamp((x - 0.5) / 0.9)), -2.2, 1.5, 1.9, { ang: 0.6, cross: true, gap: 0.012, salt: 91, wash: PALETTE.green, washA: 0.3 });
     const sy = EG + 0.02;                              // Egypt, far: the sun on the river plain and three pyramids
-    wash(g, (g) => g.arc(1.2, sy - 0.42, 0.075, 0, TAU), PALETTE.gold, 0.7, 0.004); g.strokeStyle = PALETTE.ink; g.lineWidth = 0.002; g.beginPath(); g.arc(1.2, sy - 0.42, 0.075, 0, TAU); g.stroke();
     pyramid(g, 1.75, sy, 0.3, 92); pyramid(g, 2.3, sy, 0.22, 94); pyramid(g, 2.75, sy, 0.15, 96);
     land(g, (x) => sy + 0.004 * Math.sin(x * 9), 0.2, 4.6, sy + 0.5, { ang: 0.05, gap: 0.012, salt: 97, wash: PALETTE.gold, washA: 0.3 });
   });
@@ -721,7 +705,7 @@ function c5_joseph(g, k, t, S) {
       const jx = lerp(0.2, 0.5, EASE.inOut(A(tl, 3.2, 0.8))), jy = GY + 0.2 * drop, coat = MOTION.back(A(tl, 1, 0.5));
       g.save(); g.beginPath(); g.rect(-1, -1, 3, 1 + GY + 0.012); g.clip();
       person(g, jx, jy, 0.16, { face: -1, arm: 0.3, salt: 111 });
-      g.globalCompositeOperation = 'multiply';
+      g.globalCompositeOperation = 'source-over';
       [PALETTE.accent, PALETTE.gold, PALETTE.blue, PALETTE.green, PALETTE.accent].forEach((c, i) => { g.fillStyle = c; g.globalAlpha = 0.85 * clamp(coat); g.fillRect(jx - 0.026 + i * 0.0105, jy - 0.125, 0.0105, 0.122); });
       g.restore();
     }
@@ -742,7 +726,7 @@ function c5_joseph(g, k, t, S) {
       const sx = 1.3 + i * 0.105, sk = EASE.out(A(tl, 8.6 + i * 0.35, 1)), h = 0.14 * sk;
       if (sk <= 0) continue;
       const sh = (g) => { g.moveTo(sx - 0.035, EG); g.quadraticCurveTo(sx - 0.012, EG - h * 0.6, sx - 0.045, EG - h); g.lineTo(sx + 0.045, EG - h); g.quadraticCurveTo(sx + 0.012, EG - h * 0.6, sx + 0.035, EG); g.closePath(); };
-      g.fillStyle = PALETTE.bg; g.beginPath(); sh(g); g.fill(); wash(g, sh, PALETTE.gold, 0.75, 0.003);
+      g.fillStyle = SIL; g.beginPath(); sh(g); g.fill(); wash(g, sh, PALETTE.gold, 0.75, 0.003);
       hatch(g, sh, { ang: 1.45, gap: 0.007, w: 0.0012, alpha: 0.8, box: [sx - 0.05, EG - 0.15, sx + 0.05, EG], salt: 114 + i });
       g.strokeStyle = PALETTE.ink; g.lineWidth = 0.0022; g.beginPath(); sh(g); g.stroke(); stroke(g, [[sx - 0.022, EG - h * 0.6], [sx + 0.022, EG - h * 0.6]], 0.003, PALETTE.ink);
     }
@@ -797,7 +781,7 @@ function c6_moses(g, k, t, S) {
     for (let i = 0; i < 16; i++) {
       const fx = 1.95 + (hash1(1300 + i) - 0.5) * 0.26, fh = (0.07 + 0.11 * hash1(1320 + i)) * fire * (0.75 + 0.5 * noise1(t * 5 + i * 3)), fw = 0.022 + 0.02 * hash1(1340 + i), by = GY - 0.01 - 0.1 * hash1(1360 + i), lean = 0.03 * (noise1(t * 3 + i) - 0.5);
       const fl = (g) => { g.moveTo(fx - fw, by); g.quadraticCurveTo(fx - fw * 1.2 + lean, by - fh * 0.5, fx + lean * 2, by - fh); g.quadraticCurveTo(fx + fw * 1.2 + lean, by - fh * 0.5, fx + fw, by); g.closePath(); };
-      wash(g, fl, i % 2 ? PALETTE.accent : PALETTE.gold, 0.45, 0); g.strokeStyle = PALETTE.accent; g.lineWidth = 0.002; g.globalAlpha = fire; g.beginPath(); fl(g); g.stroke(); g.globalAlpha = 1;
+      wash(g, fl, i % 2 ? PALETTE.accent : PALETTE.gold, 0.62, 0); g.strokeStyle = PALETTE.accent; g.lineWidth = 0.002; g.globalAlpha = fire; g.beginPath(); fl(g); g.stroke(); g.globalAlpha = 1;
     }
     for (const [x0, y0, x1, y1, d] of bushTwigs()) { stroke(g, [[x0, y0], [x1, y1]], 0.0075 - d * 0.0013, PALETTE.ink); if (d >= 3) { g.fillStyle = PALETTE.green; g.beginPath(); g.ellipse(x1, y1, 0.009, 0.0045, x1 * 40, 0, TAU); g.fill(); } }
     const kn = EASE.inOut(A(tl, 6.2, 1.4));               // Moses: he comes with the line, sees it, and goes down on his knees
@@ -843,7 +827,7 @@ function c7_sinai(g, k, t, S) {
     const ck = EASE.inOut(A(tl, 10.2, 4.6));
     stroke(g, coil, 0.0048, PALETTE.accent, ck);
     const tb = (g) => { g.moveTo(2.36, GY - 0.11); g.lineTo(2.47, GY - 0.2); g.lineTo(2.64, GY - 0.2); g.lineTo(2.75, GY - 0.11); g.closePath(); };
-    g.fillStyle = PALETTE.bg; g.beginPath(); tb(g); g.fill(); wash(g, tb, PALETTE.accent, 0.4); hatch(g, tb, { ang: 1.57, gap: 0.011, w: 0.0014, alpha: 0.8, box: [2.36, GY - 0.2, 2.75, GY - 0.11], salt: 196 });
+    g.fillStyle = SIL; g.beginPath(); tb(g); g.fill(); wash(g, tb, PALETTE.accent, 0.4); hatch(g, tb, { ang: 1.57, gap: 0.011, w: 0.0014, alpha: 0.8, box: [2.36, GY - 0.2, 2.75, GY - 0.11], salt: 196 });
     g.strokeStyle = PALETTE.ink; g.lineWidth = 0.0028; g.beginPath(); tb(g); g.stroke();
     for (let i = 0; i < 9; i++) stroke(g, [[2.3 + i * 0.064, GY - 0.075], [2.3 + i * 0.064, GY - 0.125]], 0.0022, PALETTE.ink);
     stroke(g, [[2.3, GY - 0.115], [2.812, GY - 0.115]], 0.0018, PALETTE.ink);
@@ -857,10 +841,10 @@ function c7_sinai(g, k, t, S) {
     for (const s of [-1, 1]) {
       const x = s * 0.165 - 0.14 + 0.0, y = lerp(0.7, -0.2, tab), w = 0.28, h = 0.5;
       const slab = (g) => { g.moveTo(x, y + h); g.lineTo(x, y + 0.14); g.arc(x + w / 2, y + 0.14, w / 2, Math.PI, 0); g.lineTo(x + w, y + h); g.closePath(); };
-      g.fillStyle = PALETTE.bg; g.beginPath(); slab(g); g.fill(); wash(g, slab, PALETTE.dim, 0.3, 0.005);
+      g.fillStyle = SIL; g.beginPath(); slab(g); g.fill(); wash(g, slab, PALETTE.dim, 0.3, 0.005);
       hatch(g, slab, { ang: 0.85, gap: 0.014, w: 0.0011, alpha: 0.35, box: [x, y, x + w, y + h], salt: 197 + s });
       hatch(g, (g) => g.rect(x + w * 0.86, y, w * 0.14, h), { ang: 0.3, gap: 0.006, w: 0.0012, alpha: 0.6, box: [x, y, x + w, y + h], salt: 199 });
-      g.save(); g.beginPath(); slab(g); g.clip(); g.strokeStyle = PALETTE.ink; g.lineWidth = 0.004; g.lineCap = 'round';
+      g.save(); g.beginPath(); slab(g); g.clip(); g.strokeStyle = PALETTE.gold; g.shadowColor = PALETTE.gold; g.shadowBlur = S.u * 0.012; g.lineWidth = 0.0045; g.lineCap = 'round';
       for (let i = 0; i < 5; i++) {
         const n = (s > 0 ? 0 : 5) + i, lk = A(tl, 6.1 + n * 0.3, 0.3), ly = y + 0.16 + i * 0.062;
         if (lk <= 0) continue;
@@ -870,7 +854,7 @@ function c7_sinai(g, k, t, S) {
         if (lk < 1) nib(g, x + w - 0.04 - 9 * lk * 0.024, ly, 0.006);
       }
       g.restore();
-      g.strokeStyle = PALETTE.ink; g.lineWidth = 0.004; g.lineJoin = 'round'; g.beginPath(); slab(g); g.stroke();
+      g.strokeStyle = 'rgba(255,207,106,0.55)'; g.lineWidth = 0.004; g.lineJoin = 'round'; g.beginPath(); slab(g); g.stroke();
     }
   });
   card(g, S, 'Forty years to cross a desert.', t, CUES.c7 + 11, CUES.c7 + 15.4, -0.425, 0.058, { plate: true });
@@ -893,7 +877,6 @@ function c8_land(g, k, t, S) {
   chartPaper(g, S, cam, 9);
   plane(g, S, cam, 0.28, (g) => {
     land(g, (x) => 0.19 - 0.05 * Math.sin(x * 1.4 + 2) - 0.02 * Math.sin(x * 4.1), -2.4, 7, 0.6, { ang: 0.08, gap: 0.012, salt: 214, wash: PALETTE.green, washA: 0.3 });
-    wash(g, (g) => g.arc(4.75, -0.05, 0.11, 0, TAU), PALETTE.gold, 0.75, 0.004); g.strokeStyle = PALETTE.ink; g.lineWidth = 0.002; g.beginPath(); g.arc(4.75, -0.05, 0.11, 0, TAU); g.stroke();
   });
   plane(g, S, cam, 0, (g) => {
     land(g, (x) => GY + 0.005 * Math.sin(x * 10), -2.4, 7.4, 0.7, { ang: 0.42, gap: 0.013, salt: 215, wash: PALETTE.gold, washA: 0.28 });
@@ -948,7 +931,7 @@ function c8_land(g, k, t, S) {
 const zion = lazy(() => { const r = rng(231); return Array.from({ length: 38 }, (_, i) => ({ u: r(), up: r(), w: 0.05 + r() * 0.05, h: 0.035 + r() * 0.05, dome: r() > 0.7, tone: r() })).sort((a, b) => a.up - b.up); });
 function crown(g, x, y, s) {
   const c = (g) => { g.moveTo(x - s, y); g.lineTo(x - s * 1.1, y - s * 0.8); g.lineTo(x - s * 0.55, y - s * 0.35); g.lineTo(x, y - s); g.lineTo(x + s * 0.55, y - s * 0.35); g.lineTo(x + s * 1.1, y - s * 0.8); g.lineTo(x + s, y); g.closePath(); };
-  g.fillStyle = PALETTE.bg; g.beginPath(); c(g); g.fill(); wash(g, c, PALETTE.gold, 0.9, 0.002); g.strokeStyle = PALETTE.ink; g.lineWidth = s * 0.1; g.lineJoin = 'round'; g.beginPath(); c(g); g.stroke();
+  g.fillStyle = SIL; g.beginPath(); c(g); g.fill(); wash(g, c, PALETTE.gold, 0.9, 0.002); g.strokeStyle = PALETTE.ink; g.lineWidth = s * 0.1; g.lineJoin = 'round'; g.beginPath(); c(g); g.stroke();
 }
 function c9_david(g, k, t, S) {
   // hold wide on the valley 3.6 s, whip right with the stone 0.5 s and settle; truck right 2 s ease-in-out and push in on the harp; truck right 2.5 s to the hill and crane up as the city builds; out 1.4 s ease-in
@@ -960,7 +943,7 @@ function c9_david(g, k, t, S) {
   plane(g, S, cam, 0.28, (g) => {
     land(g, (x) => 0.2 - 0.16 * Math.exp(-(((x + 0.95) / 0.5) ** 2)) - 0.16 * Math.exp(-(((x - 0.95) / 0.5) ** 2)) - 0.03 * Math.sin(x * 2.2), -2.4, 7.4, 0.6, { ang: 0.08, gap: 0.012, salt: 232, wash: PALETTE.green, washA: 0.3 });
     g.strokeStyle = PALETTE.ink; g.lineWidth = 0.002;    // two armies on two hills: rows of spears
-    for (const s of [-1, 1]) for (let i = 0; i < 26; i++) { const sx = s * (0.62 + (i % 13) * 0.05), sy = 0.2 - 0.16 * Math.exp(-(((sx - s * 0.95) / 0.5) ** 2)) + (i > 12 ? 0.03 : 0), sh = 0.055 + 0.012 * Math.sin(t * 3 + i) * (1 - fell) + (s > 0 ? -0.02 * fell : 0.02 * fell); g.beginPath(); g.moveTo(sx, sy); g.lineTo(sx + s * -0.004, sy - sh); g.stroke(); g.beginPath(); g.arc(sx, sy - 0.012, 0.007, 0, TAU); g.fillStyle = PALETTE.bg; g.fill(); g.stroke(); }
+    for (const s of [-1, 1]) for (let i = 0; i < 26; i++) { const sx = s * (0.62 + (i % 13) * 0.05), sy = 0.2 - 0.16 * Math.exp(-(((sx - s * 0.95) / 0.5) ** 2)) + (i > 12 ? 0.03 : 0), sh = 0.055 + 0.012 * Math.sin(t * 3 + i) * (1 - fell) + (s > 0 ? -0.02 * fell : 0.02 * fell); g.beginPath(); g.moveTo(sx, sy); g.lineTo(sx + s * -0.004, sy - sh); g.stroke(); g.beginPath(); g.arc(sx, sy - 0.012, 0.007, 0, TAU); g.fillStyle = SIL; g.fill(); g.stroke(); }
   });
   plane(g, S, cam, 0, (g) => {
     land(g, (x) => (x > 3.2 ? zh(x) : GY) + 0.005 * Math.sin(x * 10), -2.4, 7.6, 0.7, { ang: 0.42, gap: 0.013, salt: 233, wash: PALETTE.green, washA: 0.3 });
@@ -969,7 +952,7 @@ function c9_david(g, k, t, S) {
     g.save(); g.translate(0.62, GY); g.rotate(1.47 * fell);
     const gh = person(g, 0, 0, 0.44, { face: -1, arm: 0.5 + 0.3 * Math.sin(tl * 2) * (1 - fell), salt: 234, wash: PALETTE.dim, washA: 0.65 });
     stroke(g, [[gh[0], gh[1] - 0.3], [gh[0], gh[1] + 0.26]], 0.007, PALETTE.ink); g.fillStyle = PALETTE.ink; g.beginPath(); g.moveTo(gh[0], gh[1] - 0.36); g.lineTo(gh[0] - 0.014, gh[1] - 0.3); g.lineTo(gh[0] + 0.014, gh[1] - 0.3); g.fill();
-    const sh = (g) => g.ellipse(-0.06, -0.2, 0.05, 0.09, 0, 0, TAU); g.fillStyle = PALETTE.bg; g.beginPath(); sh(g); g.fill(); hatch(g, sh, { ang: 0.8, gap: 0.008, w: 0.0014, alpha: 0.8, box: [-0.12, -0.3, 0, -0.1], salt: 235, cross: true }); g.strokeStyle = PALETTE.ink; g.lineWidth = 0.003; g.beginPath(); sh(g); g.stroke();
+    const sh = (g) => g.ellipse(-0.06, -0.2, 0.05, 0.09, 0, 0, TAU); g.fillStyle = SIL; g.beginPath(); sh(g); g.fill(); hatch(g, sh, { ang: 0.8, gap: 0.008, w: 0.0014, alpha: 0.8, box: [-0.12, -0.3, 0, -0.1], salt: 235, cross: true }); g.strokeStyle = PALETTE.ink; g.lineWidth = 0.003; g.beginPath(); sh(g); g.stroke();
     g.restore();
     if (fell > 0.7) for (let j = 0; j < 5; j++) { const u = A(tl, 5 + j * 0.08, 1.4); if (u < 1) { g.strokeStyle = PALETTE.ink; g.lineWidth = 0.002; g.globalAlpha = 1 - u; g.beginPath(); g.arc(0.75 + j * 0.09, GY - 0.02 - 0.08 * u, 0.03 + 0.08 * u, Math.PI * 1.1, Math.PI * 1.9); g.stroke(); g.globalAlpha = 1; } }
     const dh = person(g, -0.6, GY, 0.14, { face: 1, arm: th > 0 ? 0.55 : 0.85, salt: 236, wash: PALETTE.blue, washA: 0.45 });
@@ -979,7 +962,7 @@ function c9_david(g, k, t, S) {
     // the harp: its strings are the line; a crown comes down
     const hx = 2.26, hy = 0.02, body = (g) => { g.moveTo(hx - 0.14, hy + 0.2); g.quadraticCurveTo(hx, hy + 0.3, hx + 0.14, hy + 0.2); g.lineTo(hx + 0.11, hy + 0.1); g.quadraticCurveTo(hx, hy + 0.16, hx - 0.11, hy + 0.1); g.closePath(); };
     const hk = EASE.out(A(tl, 6.6, 1.2));
-    g.globalAlpha = hk; g.fillStyle = PALETTE.bg; g.beginPath(); body(g); g.fill(); wash(g, body, PALETTE.gold, 0.7, 0.004); hatch(g, body, { ang: 0.2, gap: 0.008, w: 0.0013, alpha: 0.7, box: [hx - 0.15, hy + 0.1, hx + 0.15, hy + 0.3], salt: 237 });
+    g.globalAlpha = hk; g.fillStyle = SIL; g.beginPath(); body(g); g.fill(); wash(g, body, PALETTE.gold, 0.7, 0.004); hatch(g, body, { ang: 0.2, gap: 0.008, w: 0.0013, alpha: 0.7, box: [hx - 0.15, hy + 0.1, hx + 0.15, hy + 0.3], salt: 237 });
     g.strokeStyle = PALETTE.ink; g.lineWidth = 0.004; g.beginPath(); body(g); g.stroke();
     for (const s of [-1, 1]) stroke(g, [[hx + s * 0.125, hy + 0.14], [hx + s * 0.19, hy - 0.05], [hx + s * 0.15, hy - 0.26], [hx + s * 0.17, hy - 0.3]], 0.014, PALETTE.ink, hk);
     stroke(g, [[hx - 0.2, hy - 0.26], [hx + 0.2, hy - 0.26]], 0.012, PALETTE.ink, hk); g.globalAlpha = 1;
@@ -998,7 +981,7 @@ function c9_david(g, k, t, S) {
       const x = 3.82 + h.u * 0.96, base = zh(x + h.w / 2) + 0.012 + (1 - h.up) * 0.0, y = base - h.h * bk - h.up * 0.035;
       g.globalAlpha = bk; block(g, x, y, h.w, h.h * bk + 0.03, 240 + i, { wash: h.tone > 0.5 ? PALETTE.gold : PALETTE.dim, washA: 0.35, hatch: h.tone > 0.3 });
       g.fillStyle = PALETTE.ink; g.fillRect(x + h.w * 0.4, y + h.h * 0.3, h.w * 0.16, h.h * 0.3);
-      if (h.dome) { g.beginPath(); g.arc(x + h.w / 2, y, h.w * 0.32, Math.PI, 0); g.fillStyle = PALETTE.bg; g.fill(); g.strokeStyle = PALETTE.ink; g.lineWidth = 0.002; g.stroke(); }
+      if (h.dome) { g.beginPath(); g.arc(x + h.w / 2, y, h.w * 0.32, Math.PI, 0); g.fillStyle = SIL; g.fill(); g.strokeStyle = PALETTE.ink; g.lineWidth = 0.002; g.stroke(); }
       g.globalAlpha = 1;
     });
     const wk = EASE.inOut(A(tl, 14, 3));                 // the wall along the foot of the city, with its gate
@@ -1015,26 +998,24 @@ function c9_david(g, k, t, S) {
 
 // ------------------------------ C10 Solomon: the Temple, and the whole chart ------------------------------
 const STATIONS = ['EDEN', 'THE FLOOD', 'BABEL', 'ABRAHAM', 'JOSEPH', 'THE SEA', 'SINAI', 'JERICHO', 'DAVID'];
-function medallion(g, i, x, y, s, t) {                // the small plates of the whole chart
-  g.save(); g.beginPath(); g.arc(x, y, s, 0, TAU); g.fillStyle = PALETTE.bg; g.fill(); g.strokeStyle = PALETTE.ink; g.lineWidth = s * 0.035; g.stroke(); g.beginPath(); g.arc(x, y, s * 0.92, 0, TAU); g.lineWidth = s * 0.012; g.stroke();
-  g.beginPath(); g.arc(x, y, s * 0.9, 0, TAU); g.clip();
-  const gy = y + s * 0.45;
-  if (i !== 5) land(g, () => gy, x - s, x + s, y + s, { ang: 0.42, gap: s * 0.06, salt: 400 + i, wash: i === 0 || i === 8 ? PALETTE.green : PALETTE.gold, washA: 0.35, fill: false });
-  if (i === 0) { stroke(g, [[x, gy], [x, y - s * 0.1]], s * 0.07, PALETTE.ink); for (const [dx, dy] of [[-0.28, -0.2], [0.28, -0.2], [0, -0.45]]) { wash(g, (g) => g.arc(x + dx * s, y + dy * s, s * 0.27, 0, TAU), PALETTE.green, 0.6, 0); g.beginPath(); g.arc(x + dx * s, y + dy * s, s * 0.27, 0, TAU); g.lineWidth = s * 0.02; g.stroke(); } nib(g, x + s * 0.2, y - s * 0.05, s * 0.07); }
-  if (i === 1) { g.save(); g.beginPath(); g.rect(x - s, y + s * 0.2, 2 * s, s); g.clip(); wash(g, (g) => g.rect(x - s, y + s * 0.2, 2 * s, s), PALETTE.blue, 0.6, 0); waves(g, x - s, x + s, y + s * 0.25, y + s * 0.8, t, 4, 51); g.restore(); ark(g, x, y + s * 0.22, s * 0.5); }
-  if (i === 2) for (let n = 0; n < 5; n++) block(g, x - s * (0.5 - n * 0.09), gy - s * 0.2 * (n + 1), s * (1 - n * 0.18), s * 0.2, 410 + n, { wash: PALETTE.accent, washA: 0.35, gap: s * 0.05 });
-  if (i === 3) { night(g, x - s, y - s, 2 * s, s * 1.45, 1, 415); for (let n = 0; n < 12; n++) { g.fillStyle = STARLIGHT; g.beginPath(); g.arc(x + (hash1(420 + n) - 0.5) * 1.5 * s, y - s * (0.15 + 0.7 * hash1(440 + n)), s * 0.03, 0, TAU); g.fill(); } g.fillStyle = PALETTE.accent; g.beginPath(); g.moveTo(x - s * 0.4, gy); g.lineTo(x, gy - s * 0.45); g.lineTo(x + s * 0.4, gy); g.fill(); }
-  if (i === 4) { pyramid(g, x - s * 0.1, gy, s * 0.55, 450); pyramid(g, x + s * 0.5, gy, s * 0.3, 452); }
-  if (i === 5) { wash(g, (g) => g.rect(x - s, y - s * 0.3, 2 * s, 2 * s), PALETTE.blue, 0.6, 0); waves(g, x - s, x + s, y - s * 0.25, y + s, t, 7, 55); const p = (g) => { g.moveTo(x - s * 0.04, y - s * 0.3); g.lineTo(x - s * 0.4, y + s); g.lineTo(x + s * 0.4, y + s); g.lineTo(x + s * 0.04, y - s * 0.3); g.closePath(); }; g.fillStyle = PALETTE.bg; g.beginPath(); p(g); g.fill(); wash(g, p, PALETTE.gold, 0.3, 0); g.lineWidth = s * 0.025; g.beginPath(); p(g); g.stroke(); }
-  if (i === 6) { const m = (g) => { g.moveTo(x - s * 0.75, gy); g.lineTo(x, y - s * 0.55); g.lineTo(x + s * 0.75, gy); g.closePath(); }; g.fillStyle = PALETTE.bg; g.beginPath(); m(g); g.fill(); wash(g, m, PALETTE.dim, 0.5, 0); hatch(g, m, { ang: 1, gap: s * 0.05, w: s * 0.012, alpha: 0.6, box: [x - s, y - s, x + s, y + s], salt: 460, cross: true }); g.lineWidth = s * 0.025; g.beginPath(); m(g); g.stroke(); glow(g, x, y - s * 0.55, s * 0.4, 0.6, '179,38,30'); }
-  if (i === 7) for (let r = 0; r < 3; r++) for (let c = 0; c < 5; c++) { g.save(); g.translate(x - s * 0.62 + c * s * 0.31 + (r % 2) * s * 0.1, gy - s * 0.17 * (r + 0.5) - (r === 2 ? s * 0.12 * hash1(470 + c) : 0)); g.rotate(r === 2 ? (hash1(480 + c) - 0.5) * 1.4 : 0); block(g, -s * 0.15, -s * 0.085, s * 0.3, s * 0.17, 470 + r * 5 + c, { wash: PALETTE.gold, washA: 0.3, gap: s * 0.05 }); g.restore(); }
-  if (i === 8) { for (const sg of [-1, 1]) stroke(g, [[x + sg * s * 0.3, gy - s * 0.1], [x + sg * s * 0.42, y - s * 0.2], [x + sg * s * 0.34, y - s * 0.55]], s * 0.06, PALETTE.ink); stroke(g, [[x - s * 0.45, y - s * 0.5], [x + s * 0.45, y - s * 0.5]], s * 0.05, PALETTE.ink); for (let n = 0; n < 6; n++) stroke(g, [[x - s * 0.25 + n * s * 0.1, y - s * 0.48], [x - s * 0.25 + n * s * 0.1, gy - s * 0.1]], s * 0.022, PALETTE.accent); }
+function medallion(g, i, x, y, s, t) {                // each chapter again, small, as a silhouette on the one horizon; y = the ground
+  if (s <= 0) return;
+  g.save(); g.fillStyle = SIL; g.strokeStyle = SIL; g.lineCap = 'round'; g.lineJoin = 'round';
+  if (i === 0) { const T = edenTree(); g.translate(x, y); g.scale(s * 1.5, s * 1.5); g.translate(0, -GY); for (const q of T.segs) { g.lineWidth = q.w; g.beginPath(); g.moveTo(q.x, q.y); g.lineTo(q.x1, q.y1); g.stroke(); } for (const [tx, ty] of T.tips) { g.beginPath(); g.ellipse(tx, ty, 0.05, 0.035, 0, 0, TAU); g.fill(); } }
+  if (i === 1) { ark(g, x, y - s * 0.12, s * 0.62); g.beginPath(); g.ellipse(x, y, s * 0.9, s * 0.12, 0, Math.PI, 0); g.fill(); }
+  if (i === 2) for (let n = 0; n < 6; n++) g.fillRect(x - s * (0.5 - n * 0.07), y - s * 0.22 * (n + 1), s * (1 - n * 0.14), s * 0.23);
+  if (i === 3) { g.beginPath(); g.moveTo(x - s * 0.55, y); g.lineTo(x, y - s * 0.6); g.lineTo(x + s * 0.55, y); g.fill(); g.fillStyle = STARLIGHT; for (let n = 0; n < 9; n++) { g.beginPath(); g.arc(x + (hash1(420 + n) - 0.5) * 1.5 * s, y - s * (0.9 + 0.8 * hash1(440 + n)), s * 0.035, 0, TAU); g.fill(); } }
+  if (i === 4) for (const [dx, k] of [[-0.15, 0.75], [0.5, 0.42]]) { g.beginPath(); g.moveTo(x + s * (dx - k), y); g.lineTo(x + s * dx, y - s * k * 1.25); g.lineTo(x + s * (dx + k), y); g.fill(); }
+  if (i === 5) for (const sg of [-1, 1]) { g.beginPath(); g.moveTo(x + sg * s * 0.9, y); g.quadraticCurveTo(x + sg * s * 0.75, y - s * 1.1, x + sg * s * 0.12, y - s * 0.95); g.quadraticCurveTo(x + sg * s * 0.4, y - s * 0.5, x + sg * s * 0.14, y); g.fill(); }
+  if (i === 6) { g.beginPath(); g.moveTo(x - s * 0.95, y); g.lineTo(x - s * 0.2, y - s * 0.9); g.lineTo(x, y - s * 1.15); g.lineTo(x + s * 0.3, y - s * 0.8); g.lineTo(x + s * 0.95, y); g.fill(); glow(g, x, y - s * 1.15, s * 0.5, 0.8, '255,80,56'); }
+  if (i === 7) for (let n = 0; n < 9; n++) { g.save(); g.translate(x - s * 0.8 + n * s * 0.2, y - s * (0.12 + 0.3 * hash1(470 + n) * (n % 4 === 0 ? 2.4 : 1))); g.rotate((hash1(480 + n) - 0.5) * 1.2); g.fillRect(-s * 0.15, -s * 0.1, s * 0.3, s * 0.2); g.restore(); }
+  if (i === 8) { g.lineWidth = s * 0.09; for (const sg of [-1, 1]) { g.beginPath(); g.moveTo(x + sg * s * 0.3, y - s * 0.25); g.lineTo(x + sg * s * 0.46, y - s * 0.7); g.lineTo(x + sg * s * 0.36, y - s * 1.2); g.stroke(); } g.beginPath(); g.moveTo(x - s * 0.5, y - s * 1.15); g.lineTo(x + s * 0.5, y - s * 1.15); g.stroke(); g.beginPath(); g.ellipse(x, y - s * 0.16, s * 0.4, s * 0.18, 0, 0, TAU); g.fill(); for (let n = 0; n < 6; n++) stroke(g, [[x - s * 0.25 + n * s * 0.1, y - s * 1.12], [x - s * 0.25 + n * s * 0.1, y - s * 0.25]], s * 0.03, PALETTE.accent); }
   g.restore();
 }
 function c10_solomon(g, k, t, S) {
   // truck right with the line 2.4 s ease-out, crane up slowly as the courses rise; hold on the plumb line; the one big pull back 6 s ease-in-out to the whole chart; drift
   const tl = t - CUES.c10, run = EASE.out(A(tl, 0, 2.4)), build = A(tl, 0.6, 6.6), gold = EASE.out(A(tl, 8.5, 3.2)), back = EASE.inOut(A(tl, 12.4, 6)), drift = A(tl, 18.4, 5.6);
-  const cam = CAM.base(); cam.x = lerp(-0.9, 0, run) - 3.675 * back; cam.y = -0.1 * EASE.inOut(A(tl, 1, 7)) * (1 - back) + 0.02 * back; cam.dist = 1.12 + 4.5 * back + 0.14 * drift;
+  const cam = CAM.base(); cam.x = lerp(-0.9, 0, run) - 3.675 * back; cam.y = -0.1 * EASE.inOut(A(tl, 1, 7)) * (1 - back) - 1.0 * back; cam.dist = 1.12 + 4.5 * back + 0.14 * drift;
   const base = GY - 0.09, topY = base - 9 * 0.045, drop = EASE.out(A(tl, 6.5, 1.0)), sw = 0.2 * Math.exp(-1.6 * Math.max(0, tl - 6.5)) * Math.cos(5.2 * (tl - 6.5)) * (tl > 6.5 ? 1 : 0);
   chartPaper(g, S, cam, 11, 2.2 + 1.9 * cam.dist);
   plane(g, S, cam, 0.28, (g) => {
@@ -1042,13 +1023,13 @@ function c10_solomon(g, k, t, S) {
     if (gold > 0) { g.save(); g.strokeStyle = PALETTE.gold; g.lineCap = 'round'; for (let i = 0; i < 30; i++) { const a = -Math.PI * (i + 0.5) / 30, r1 = (0.5 + 0.5 * hash1(350 + i)) * 1.2 * gold; g.globalAlpha = 0.5; g.lineWidth = 0.012; g.beginPath(); g.moveTo(Math.cos(a) * 0.4, 0.05 + Math.sin(a) * 0.4); g.lineTo(Math.cos(a) * (0.4 + r1), 0.05 + Math.sin(a) * (0.4 + r1)); g.stroke(); } g.restore(); }
   });
   plane(g, S, cam, 0, (g) => {
-    land(g, (x) => GY + 0.005 * Math.sin(x * 10), -9.6, 2.6, 0.7, { ang: 0.42, gap: 0.013, salt: 342, wash: PALETTE.gold, washA: 0.28 });
+    land(g, (x) => GY + 0.005 * Math.sin(x * 10), -9.6, 2.6, 3.4, { ang: 0.42, gap: 0.013, salt: 342, wash: PALETTE.gold, washA: 0.28 });
     // the whole chart: every plate again, small, on the one line
     if (back > 0.02) STATIONS.forEach((name, i) => {
       const x = -7.65 + i * 0.85, mk = MOTION.back(A(tl, 13 + (8 - i) * 0.42, 0.6), 1.2);
       if (mk <= 0) return;
-      medallion(g, i, x, GY - 0.02, 0.31 * mk, t);
-      text(g, S, name, x, i % 2 ? GY + 0.56 : GY - 0.56, 0.17, PALETTE.ink, clamp(mk), 0.06, { role: 'text', weight: 700 });
+      medallion(g, i, x, GY + 0.004, 0.36 * mk, t);
+      text(g, S, name, x, i % 2 ? GY + 0.62 : GY + 0.3, 0.16, STARLIGHT, clamp(mk), 0.06, { weight: 700 });
     });
     lineage(g, -9.6, lerp(-2, -0.62, run), GY, 0.007 + 0.012 * back);
     // the Temple: three steps, nine courses, two pillars, a door
@@ -1068,7 +1049,7 @@ function c10_solomon(g, k, t, S) {
       g.globalAlpha = work; for (const x of [-0.42, -0.34]) stroke(g, [[x, GY], [x, -0.44]], 0.004, PALETTE.ink); for (let i = 1; i < 12; i++) stroke(g, [[-0.42, GY - i * 0.058], [-0.34, GY - i * 0.058]], 0.0025, PALETTE.ink);
       stroke(g, [[-0.44, -0.44], [0.02, -0.44]], 0.005, PALETTE.ink);
       for (let i = 0; i < 4; i++) { const hx = 0.62 + (i % 2) * 0.16 + 0.03 * Math.sin(tl * 1.4 + i), hy = i < 2 ? GY : GY; const hnd = person(g, hx - (i > 1 ? 1.5 : 0), hy, 0.12, { face: i > 1 ? 1 : -1, arm: 0.5 + 0.3 * Math.sin(tl * 3 + i), lean: 0.12, p: tl * 0.8 + i * 0.4, salt: 610 + i }); block(g, hnd[0] - 0.02, hnd[1] - 0.03, 0.045, 0.028, 614 + i, { wash: PALETTE.gold, washA: 0.3, hatch: false }); }
-      for (let i = 0; i < 5; i++) { g.beginPath(); g.ellipse(0.95 + (i % 3) * 0.045 + (i > 2 ? 0.022 : 0), GY - 0.02 - (i > 2 ? 0.036 : 0), 0.022, 0.02, 0, 0, TAU); g.fillStyle = PALETTE.bg; g.fill(); g.strokeStyle = PALETTE.ink; g.lineWidth = 0.0025; g.stroke(); g.beginPath(); g.arc(0.95 + (i % 3) * 0.045 + (i > 2 ? 0.022 : 0), GY - 0.02 - (i > 2 ? 0.036 : 0), 0.009, 0, TAU); g.stroke(); }
+      for (let i = 0; i < 5; i++) { g.beginPath(); g.ellipse(0.95 + (i % 3) * 0.045 + (i > 2 ? 0.022 : 0), GY - 0.02 - (i > 2 ? 0.036 : 0), 0.022, 0.02, 0, 0, TAU); g.fillStyle = SIL; g.fill(); g.strokeStyle = PALETTE.ink; g.lineWidth = 0.0025; g.stroke(); g.beginPath(); g.arc(0.95 + (i % 3) * 0.045 + (i > 2 ? 0.022 : 0), GY - 0.02 - (i > 2 ? 0.036 : 0), 0.009, 0, TAU); g.stroke(); }
       g.globalAlpha = 1;
     }
     // the line's last move: up the scaffold, along the beam, and straight down as a plumb line
@@ -1077,11 +1058,9 @@ function c10_solomon(g, k, t, S) {
     stroke(g, [[-0.38, -0.44], [0, -0.44]], LW, PALETTE.accent, EASE.inOut(along));
     if (drop > 0) { const L = 0.5 * drop, bx = Math.sin(sw) * L, by = -0.44 + Math.cos(sw) * L; stroke(g, [[0, -0.44], [bx, by]], LW, PALETTE.accent); g.fillStyle = PALETTE.accent; g.beginPath(); g.moveTo(bx - 0.016, by); g.lineTo(bx + 0.016, by); g.lineTo(bx, by + 0.045); g.closePath(); g.fill(); g.beginPath(); g.arc(bx, by, 0.016, Math.PI, 0); g.fill(); }
     if (back > 0.02) {
-      text(g, S, 'THE TEMPLE', 0, GY + 0.56, 0.17, PALETTE.ink, clamp(back * 2), 0.06, { role: 'text', weight: 700 });
-      g.strokeStyle = PALETTE.ink; g.globalAlpha = clamp(back * 1.5 - 0.3); g.lineWidth = 0.014; g.strokeRect(-8.45, -2.25, 9.55, 4.4); g.lineWidth = 0.006; g.strokeRect(-8.38, -2.18, 9.41, 4.26);
-      g.lineWidth = 0.005; g.beginPath(); for (let i = 0; i <= 188; i++) { const x = -8.38 + i * 0.05, h = i % 10 === 0 ? 0.09 : i % 5 === 0 ? 0.06 : 0.035; g.moveTo(x, -1.02); g.lineTo(x, -1.02 + h); g.moveTo(x, 1.2); g.lineTo(x, 1.2 - h); } g.moveTo(-8.38, -1.02); g.lineTo(1.03, -1.02); g.moveTo(-8.38, 1.2); g.lineTo(1.03, 1.2); g.stroke(); g.globalAlpha = 1;
-      text(g, S, 'From a Garden to a Temple', -3.675, -1.56, 0.5, PALETTE.ink, 1, null, { weight: 400, reveal: A(tl, 17.2, 2), by: 'word', spread: 0.7 });
-      text(g, S, 'ADAM  ·  NOAH  ·  ABRAHAM  ·  JOSEPH  ·  MOSES  ·  JOSHUA  ·  DAVID  ·  SOLOMON', -3.675, 1.68, 0.16, PALETTE.ink, EASE.out(A(tl, 19.4, 1.4)), 0.05, { role: 'text', weight: 400 });
+      text(g, S, 'THE TEMPLE', 0, GY + 0.62, 0.16, STARLIGHT, clamp(back * 2), 0.06, { weight: 700 });
+      text(g, S, 'FROM A GARDEN TO A TEMPLE', -3.675, -2.1, 0.42, SIL, 1, 0.08, { weight: 700, reveal: A(tl, 17.2, 2), by: 'word', spread: 0.7 });
+      text(g, S, 'ADAM  ·  NOAH  ·  ABRAHAM  ·  JOSEPH  ·  MOSES  ·  JOSHUA  ·  DAVID  ·  SOLOMON', -3.675, 1.22, 0.15, STARLIGHT, EASE.out(A(tl, 19.4, 1.4)) * 0.85, 0.08, { weight: 400 });
     }
   });
   place(g, S, 'JERUSALEM  ·  1 KINGS 6', t, CUES.c10 + 1, CUES.c10 + 11.6);

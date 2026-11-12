@@ -1,0 +1,138 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><style>
+@font-face { font-family: Cinzel; src: url(../fonts/cinzel-latin-700-normal.woff2); font-weight: 700; }
+@font-face { font-family: Fell; src: url(../fonts/im-fell-english-latin-400-normal.woff2); }
+html, body { margin: 0; background: #000; } canvas { display: block; }
+</style></head><body><canvas id="c" width="1280" height="720"></canvas>
+<script>
+// Style test: the Eden scene drawn three ways (?style=a silhouettes, b storybook, c stained glass). One still each.
+const W = 1280, H = 720, TAU = Math.PI * 2, style = new URLSearchParams(location.search).get('style') || 'a';
+const c = document.getElementById('c'), g = c.getContext('2d');
+function rng(seed) { let a = seed >>> 0; return () => { a = (a + 0x6D2B79F5) >>> 0; let t = a; t = Math.imul(t ^ (t >>> 15), t | 1); t ^= t + Math.imul(t ^ (t >>> 7), t | 61); return ((t ^ (t >>> 14)) >>> 0) / 4294967296; }; }
+const lerp = (a, b, k) => a + (b - a) * k;
+// the tree, shared: branches and leaf tips
+function tree(x, y, len, w, seed) {
+  const r = rng(seed), segs = [], tips = [];
+  const grow = (x, y, a, len, w, d) => { const x1 = x + Math.cos(a) * len, y1 = y + Math.sin(a) * len; segs.push([x, y, x1, y1, w, d]); if (d >= 5) { tips.push([x1, y1, r()]); return; } const n = d < 1 ? 3 : 2; for (let i = 0; i < n; i++) grow(x1, y1, a + (i - (n - 1) / 2) * (0.62 + r() * 0.3) + (r() - 0.5) * 0.3, len * (0.7 + r() * 0.1), w * 0.68, d + 1); };
+  grow(x, y, -Math.PI / 2, len, w, 0); return { segs, tips };
+}
+function branches(T, color) { g.strokeStyle = color; g.lineCap = 'round'; for (const [x, y, x1, y1, w] of T.segs) { g.lineWidth = w; g.beginPath(); g.moveTo(x, y); g.lineTo(x1, y1); g.stroke(); } }
+// a human figure built from limbs; o: facing, arm (radians of the near arm from straight down), hair
+function human(x, y, h, o, fill, skin = fill, hair = fill) {
+  const f = o.f ?? 1, u = h / 8;
+  g.fillStyle = fill; g.strokeStyle = fill; g.lineCap = 'round'; g.lineJoin = 'round';
+  g.lineWidth = u * 0.85; for (const s of [-1, 1]) { g.beginPath(); g.moveTo(x + s * u * 0.4, y - u * 4); g.lineTo(x + s * u * 0.55 + f * u * 0.1 * s, y - u * 2); g.lineTo(x + s * u * 0.5, y); g.stroke(); }
+  g.beginPath(); g.moveTo(x - u * 0.95, y - u * 6.3); g.quadraticCurveTo(x, y - u * 6.7, x + u * 0.95, y - u * 6.3); g.lineTo(x + u * 0.75, y - u * 3.7); g.lineTo(x - u * 0.75, y - u * 3.7); g.closePath(); g.fill();
+  if (o.wrap) { g.fillStyle = o.wrap; g.beginPath(); g.moveTo(x - u * 0.95, y - u * 4.6); g.lineTo(x + u * 0.95, y - u * 4.6); g.lineTo(x + u * 1.05, y - u * 2.9); g.lineTo(x - u * 1.05, y - u * 2.9); g.closePath(); g.fill(); if (o.top) { g.fillRect(x - u * 0.9, y - u * 6.1, u * 1.8, u * 1.0); } }
+  g.strokeStyle = skin; g.lineWidth = u * 0.55;
+  const arm = (side, a) => { const sx = x + side * u * 0.9, sy = y - u * 6.1, ex = sx + Math.sin(a) * u * 1.5 * f, ey = sy + Math.cos(a) * u * 1.5, hx = ex + Math.sin(a * 1.15) * u * 1.4 * f, hy = ey + Math.cos(a * 1.15) * u * 1.4; g.beginPath(); g.moveTo(sx, sy); g.lineTo(ex, ey); g.lineTo(hx, hy); g.stroke(); return [hx, hy]; };
+  arm(-f, 0.12); const hand = arm(f, o.arm ?? 0.15);
+  g.fillStyle = skin; g.fillRect(x - u * 0.22, y - u * 7, u * 0.44, u * 0.6);
+  g.beginPath(); g.ellipse(x + f * u * 0.05, y - u * 7.45, u * 0.55, u * 0.62, 0, 0, TAU); g.fill();
+  g.fillStyle = hair; g.beginPath();
+  if (o.hair === 'long') { g.ellipse(x - f * u * 0.12, y - u * 7.55, u * 0.62, u * 0.66, 0, 0, TAU); g.fill(); g.beginPath(); g.moveTo(x - f * u * 0.72, y - u * 7.5); g.quadraticCurveTo(x - f * u * 1.15, y - u * 5.8, x - f * u * 0.55, y - u * 4.6); g.lineTo(x - f * u * 0.05, y - u * 6.6); g.closePath(); g.fill(); }
+  else { g.ellipse(x - f * u * 0.1, y - u * 7.62, u * 0.6, u * 0.5, 0, 0, TAU); g.fill(); }
+  if (o.face) { g.fillStyle = skin; g.beginPath(); g.ellipse(x + f * u * 0.12, y - u * 7.4, u * 0.46, u * 0.52, 0, 0, TAU); g.fill(); g.fillStyle = '#2b1d14'; g.beginPath(); g.arc(x + f * u * 0.3, y - u * 7.48, u * 0.07, 0, TAU); g.fill(); g.strokeStyle = '#8a3b2a'; g.lineWidth = u * 0.06; g.beginPath(); g.arc(x + f * u * 0.26, y - u * 7.22, u * 0.14, 0.2, 1.4); g.stroke(); }
+  return hand;
+}
+function caption(str, color, shadow) { g.font = '700 30px Cinzel'; g.textAlign = 'center'; g.fillStyle = shadow; g.fillText(str, W / 2 + 2, H - 44 + 2); g.fillStyle = color; g.fillText(str, W / 2, H - 44); }
+function grain(a) { const r = rng(9), d = g.getImageData(0, 0, W, H); for (let i = 0; i < d.data.length; i += 4) { const n = (r() - 0.5) * 255 * a; d.data[i] += n; d.data[i + 1] += n; d.data[i + 2] += n; } g.putImageData(d, 0, 0); }
+function vignette(a) { const v = g.createRadialGradient(W / 2, H / 2, H * 0.45, W / 2, H / 2, H * 1.05); v.addColorStop(0, 'rgba(0,0,0,0)'); v.addColorStop(1, `rgba(0,0,0,${a})`); g.fillStyle = v; g.fillRect(0, 0, W, H); }
+
+// ---------------- A: epic silhouettes against a painted sky ----------------
+function styleA() {
+  const r = rng(4), sky = g.createLinearGradient(0, 0, 0, H * 0.8);
+  [[0, '#1b1440'], [0.3, '#5b2a6e'], [0.55, '#c2456a'], [0.78, '#f28a3c'], [1, '#ffd98a']].forEach(([k, col]) => sky.addColorStop(k, col)); g.fillStyle = sky; g.fillRect(0, 0, W, H);
+  const sx = 430, sy = 470; let gl = g.createRadialGradient(sx, sy, 0, sx, sy, 520); gl.addColorStop(0, 'rgba(255,244,200,0.95)'); gl.addColorStop(0.12, 'rgba(255,214,130,0.75)'); gl.addColorStop(0.45, 'rgba(255,150,80,0.22)'); gl.addColorStop(1, 'rgba(255,120,80,0)'); g.fillStyle = gl; g.fillRect(0, 0, W, H);
+  g.fillStyle = '#fff6d8'; g.beginPath(); g.arc(sx, sy, 62, 0, TAU); g.fill();
+  for (let i = 0; i < 26; i++) { const cx = r() * W * 1.2 - 100, cy = 60 + r() * 330, cw = 120 + r() * 300, chh = 10 + r() * 22; const cg = g.createLinearGradient(0, cy - chh, 0, cy + chh); cg.addColorStop(0, 'rgba(60,30,80,0.55)'); cg.addColorStop(1, 'rgba(255,170,110,0.6)'); g.fillStyle = cg; g.beginPath(); g.ellipse(cx, cy, cw, chh, 0, 0, TAU); g.fill(); }
+  for (const [base, amp, col, seed] of [[500, 60, '#7a3a6c', 2], [535, 45, '#4f2552', 5], [570, 30, '#2c1636', 8]]) { const q = rng(seed), p1 = q() * 6, p2 = q() * 6; g.fillStyle = col; g.beginPath(); g.moveTo(0, H); for (let x = 0; x <= W; x += 8) g.lineTo(x, base - amp * Math.sin(x * 0.004 + p1) - amp * 0.4 * Math.sin(x * 0.013 + p2)); g.lineTo(W, H); g.fill(); }
+  g.fillStyle = 'rgba(255,190,120,0.35)'; g.fillRect(0, 588, W, 10);       // a far river catching the light
+  const K = '#0b0710', T = tree(760, 640, 150, 30, 21);
+  g.save(); g.globalCompositeOperation = 'lighter'; for (let i = 0; i < 9; i++) { const a = -0.5 + i * 0.16; g.fillStyle = 'rgba(255,200,120,0.07)'; g.beginPath(); g.moveTo(sx, sy); g.lineTo(sx + Math.cos(a) * 1400, sy + Math.sin(a) * 1400); g.lineTo(sx + Math.cos(a + 0.07) * 1400, sy + Math.sin(a + 0.07) * 1400); g.fill(); } g.restore();
+  branches(T, K); g.fillStyle = K; for (const [x, y, q] of T.tips) for (let j = 0; j < 9; j++) { g.beginPath(); g.ellipse(x + (r() - 0.5) * 70, y + (r() - 0.5) * 50, 14 + r() * 14, 8 + r() * 8, r() * 3, 0, TAU); g.fill(); }
+  g.beginPath(); g.moveTo(0, H); for (let x = 0; x <= W; x += 6) g.lineTo(x, 640 - 16 * Math.sin(x * 0.005 + 1) + 4 * Math.sin(x * 0.05)); g.lineTo(W, H); g.fill();
+  g.strokeStyle = K; g.lineWidth = 2.2; for (let i = 0; i < 420; i++) { const x = r() * W, y0 = 642 - 16 * Math.sin(x * 0.005 + 1), hh = 8 + r() * 26; g.beginPath(); g.moveTo(x, y0 + 4); g.quadraticCurveTo(x + (r() - 0.5) * 8, y0 - hh * 0.5, x + (r() - 0.5) * 18, y0 - hh); g.stroke(); }
+  g.lineWidth = 9; g.beginPath(); for (let i = 0; i <= 50; i++) { const u = i / 50; g.lineTo(760 + Math.sin(u * 16) * (20 - 6 * u), 630 - u * 170); } g.stroke();     // the serpent
+  human(560, 636, 170, { f: 1, arm: 0.2 }, K);
+  const hand = human(905, 634, 158, { f: -1, arm: 2.25, hair: 'long' }, K);
+  for (const [fx, fy, big] of [[hand[0] - 6, hand[1] - 14, 1], [700, 330, 0], [850, 300, 0], [640, 400, 0], [930, 380, 0]]) { const fg = g.createRadialGradient(fx, fy, 0, fx, fy, big ? 46 : 22); fg.addColorStop(0, 'rgba(255,90,60,0.9)'); fg.addColorStop(1, 'rgba(255,60,40,0)'); g.fillStyle = fg; g.fillRect(fx - 50, fy - 50, 100, 100); g.fillStyle = '#ff5a3c'; g.beginPath(); g.arc(fx, fy, big ? 10 : 6, 0, TAU); g.fill(); }
+  g.strokeStyle = K; g.lineWidth = 2.5; for (let i = 0; i < 9; i++) { const bx = 120 + r() * 520, by = 120 + r() * 200, s = 8 + r() * 10; g.beginPath(); g.moveTo(bx - s, by - s * 0.4); g.quadraticCurveTo(bx - s * 0.4, by - s * 0.7, bx, by); g.quadraticCurveTo(bx + s * 0.4, by - s * 0.7, bx + s, by - s * 0.4); g.stroke(); }
+  g.save(); g.shadowColor = '#ff3a20'; g.shadowBlur = 18; g.strokeStyle = '#ff5038'; g.lineWidth = 4; g.beginPath(); g.moveTo(0, 668); g.bezierCurveTo(300, 690, 520, 650, 760, 664); g.stroke(); g.restore();   // the red line, glowing
+  vignette(0.55); g.fillStyle = '#000'; g.fillRect(0, 0, W, 54); g.fillRect(0, H - 54, W, 54);
+  g.font = '700 24px Cinzel'; g.textAlign = 'center'; g.fillStyle = '#f4e6c8'; g.fillText('IN THE BEGINNING, A GARDEN', W / 2, H - 20);
+  grain(0.05);
+}
+
+// ---------------- B: storybook animation ----------------
+function styleB() {
+  const r = rng(6), sky = g.createLinearGradient(0, 0, 0, H); sky.addColorStop(0, '#8fd3e8'); sky.addColorStop(0.55, '#d8f0e4'); sky.addColorStop(1, '#fbf1cf'); g.fillStyle = sky; g.fillRect(0, 0, W, H);
+  let sg = g.createRadialGradient(250, 150, 0, 250, 150, 260); sg.addColorStop(0, 'rgba(255,246,190,1)'); sg.addColorStop(0.25, 'rgba(255,236,160,0.6)'); sg.addColorStop(1, 'rgba(255,236,160,0)'); g.fillStyle = sg; g.fillRect(0, 0, W, H); g.fillStyle = '#fff3b0'; g.beginPath(); g.arc(250, 150, 58, 0, TAU); g.fill();
+  g.fillStyle = 'rgba(255,255,255,0.85)'; for (const [cx, cy, s] of [[560, 110, 1], [980, 170, 1.3], [120, 300, 0.8], [1150, 70, 0.7]]) for (const [dx, dy, rr] of [[0, 0, 34], [38, 8, 28], [-36, 10, 26], [14, -18, 26]]) { g.beginPath(); g.arc(cx + dx * s, cy + dy * s, rr * s, 0, TAU); g.fill(); }
+  const hill = (base, amp, ph, col, col2) => { const gr = g.createLinearGradient(0, base - amp, 0, H); gr.addColorStop(0, col); gr.addColorStop(1, col2); g.fillStyle = gr; g.beginPath(); g.moveTo(0, H); for (let x = 0; x <= W; x += 8) g.lineTo(x, base - amp * Math.sin(x * 0.0042 + ph) - amp * 0.3 * Math.sin(x * 0.011 + ph * 2)); g.lineTo(W, H); g.fill(); };
+  hill(430, 55, 1, '#a9dcae', '#8fcf9c'); hill(500, 50, 3.4, '#86cf8c', '#6fc07c');
+  g.fillStyle = '#7fd0e6'; g.beginPath(); g.moveTo(1280, 470); g.bezierCurveTo(1000, 480, 1080, 560, 820, 580); g.bezierCurveTo(600, 600, 700, 690, 420, 720); g.lineTo(700, 720); g.bezierCurveTo(880, 680, 800, 620, 980, 600); g.bezierCurveTo(1180, 575, 1160, 520, 1280, 510); g.fill();
+  hill(600, 34, 0.4, '#63bd6c', '#3f9d57');
+  for (let i = 0; i < 9; i++) { const bx = 60 + i * 150 + r() * 60, by = 470 + r() * 60, s = 0.6 + r() * 0.5; if (Math.abs(bx - 720) < 190) continue; g.fillStyle = '#7b5a3c'; g.fillRect(bx - 5 * s, by - 46 * s, 10 * s, 50 * s); g.fillStyle = ['#4fae62', '#6cc070', '#3f9d57'][i % 3]; for (const [dx, dy, rr] of [[0, -70, 34], [-24, -52, 26], [24, -52, 26]]) { g.beginPath(); g.arc(bx + dx * s, by + dy * s, rr * s, 0, TAU); g.fill(); } }
+  const T = tree(720, 610, 135, 46, 21);
+  branches(T, '#6e4a2e'); g.save(); g.globalAlpha = 0.35; branches({ segs: T.segs.map(([x, y, x1, y1, w, d]) => [x - w * 0.18, y, x1 - w * 0.18, y1, w * 0.35, d]) }, '#b98c5e'); g.restore();
+  for (const [col, dy, rr] of [['#2f8f4e', 10, 46], ['#49ad5c', 0, 40], ['#7fcf6e', -10, 24]]) { g.fillStyle = col; for (const [x, y, q] of T.tips) { g.beginPath(); g.arc(x + (q - 0.5) * 30, y + dy + (q - 0.5) * 16, rr * (0.8 + q * 0.4), 0, TAU); g.fill(); } }
+  for (let i = 0; i < T.tips.length; i += 5) { const [x, y] = T.tips[i]; g.fillStyle = '#e23b2e'; g.beginPath(); g.arc(x + 8, y + 26, 11, 0, TAU); g.fill(); g.fillStyle = '#ff8f7a'; g.beginPath(); g.arc(x + 4, y + 22, 3.5, 0, TAU); g.fill(); }
+  g.strokeStyle = '#3f8f3a'; g.lineWidth = 12; g.lineCap = 'round'; g.beginPath(); for (let i = 0; i <= 50; i++) { const u = i / 50; g.lineTo(720 + Math.sin(u * 15) * (30 - 8 * u), 590 - u * 150); } g.stroke(); g.fillStyle = '#3f8f3a'; g.beginPath(); g.ellipse(738, 432, 16, 11, -0.4, 0, TAU); g.fill(); g.fillStyle = '#fff'; g.beginPath(); g.arc(744, 428, 3.5, 0, TAU); g.fill(); g.fillStyle = '#222'; g.beginPath(); g.arc(745, 428, 1.8, 0, TAU); g.fill();
+  hill(650, 14, 2, '#57b862', '#3d9a52');
+  for (let i = 0; i < 60; i++) { const fx = r() * W, fy = 640 + r() * 70; g.fillStyle = ['#ffd84a', '#ff7fa0', '#ffffff', '#c58cf0'][i % 4]; for (let p = 0; p < 5; p++) { g.beginPath(); g.arc(fx + Math.cos(p * 1.256) * 5, fy + Math.sin(p * 1.256) * 5, 3.6, 0, TAU); g.fill(); } g.fillStyle = '#f0a020'; g.beginPath(); g.arc(fx, fy, 2.6, 0, TAU); g.fill(); }
+  human(520, 640, 190, { f: 1, arm: 0.3, wrap: '#3f9d57', face: 1 }, '#c98b5e', '#c98b5e', '#3a2416');
+  const hand = human(915, 640, 178, { f: -1, arm: 2.2, hair: 'long', wrap: '#3f9d57', top: 1, face: 1 }, '#d9a074', '#d9a074', '#2a1810');
+  g.fillStyle = '#e23b2e'; g.beginPath(); g.arc(hand[0] - 4, hand[1] - 12, 13, 0, TAU); g.fill(); g.fillStyle = '#ff8f7a'; g.beginPath(); g.arc(hand[0] - 8, hand[1] - 16, 4, 0, TAU); g.fill();
+  for (const [bx, by, col] of [[380, 250, '#e8553d'], [1020, 320, '#3d7fe8'], [1100, 250, '#f2c02e']]) { g.fillStyle = col; g.beginPath(); g.ellipse(bx, by, 15, 9, 0, 0, TAU); g.fill(); g.beginPath(); g.moveTo(bx - 4, by - 4); g.lineTo(bx - 14, by - 22); g.lineTo(bx + 8, by - 6); g.fill(); g.fillStyle = '#f2a02e'; g.beginPath(); g.moveTo(bx + 14, by - 2); g.lineTo(bx + 24, by); g.lineTo(bx + 14, by + 3); g.fill(); }
+  g.strokeStyle = '#e23b2e'; g.lineWidth = 6; g.lineCap = 'round'; g.beginPath(); g.moveTo(0, 678); g.bezierCurveTo(260, 700, 500, 660, 720, 672); g.stroke();
+  g.fillStyle = 'rgba(255,250,235,0.92)'; g.beginPath(); g.roundRect(W / 2 - 290, 22, 580, 58, 29); g.fill();
+  g.font = '34px Fell'; g.textAlign = 'center'; g.fillStyle = '#3a2a1c'; g.fillText('In the beginning, a garden.', W / 2, 63);
+  grain(0.035);
+}
+
+// ---------------- C: stained glass ----------------
+function styleC() {
+  const r = rng(8), b = document.createElement('canvas'); b.width = W; b.height = H; const o = b.getContext('2d'), G = g;
+  // 1. the picture in flat glass colours
+  const sky = o.createLinearGradient(0, 0, 0, H); sky.addColorStop(0, '#0f2c7a'); sky.addColorStop(0.6, '#2f6fc4'); sky.addColorStop(1, '#7fc0e8'); o.fillStyle = sky; o.fillRect(0, 0, W, H);
+  for (let i = 0; i < 24; i++) { const a = i / 24 * TAU; o.fillStyle = i % 2 ? '#f6c53a' : '#f08a1c'; o.beginPath(); o.moveTo(300, 190); o.lineTo(300 + Math.cos(a) * 330, 190 + Math.sin(a) * 330); o.lineTo(300 + Math.cos(a + TAU / 24) * 330, 190 + Math.sin(a + TAU / 24) * 330); o.fill(); }
+  const fade = o.createRadialGradient(300, 190, 180, 300, 190, 340); fade.addColorStop(0, 'rgba(47,111,196,0)'); fade.addColorStop(1, 'rgba(31,80,170,1)'); o.fillStyle = fade; o.fillRect(0, 0, W, H);
+  o.fillStyle = '#fff1a8'; o.beginPath(); o.arc(300, 190, 74, 0, TAU); o.fill();
+  for (const [base, amp, ph, col] of [[470, 50, 1, '#3f8f5a'], [540, 40, 3.2, '#2f7a48'], [620, 20, 0.5, '#1f6a3a']]) { o.fillStyle = col; o.beginPath(); o.moveTo(0, H); for (let x = 0; x <= W; x += 8) o.lineTo(x, base - amp * Math.sin(x * 0.0045 + ph)); o.lineTo(W, H); o.fill(); }
+  const T = tree(740, 630, 140, 44, 21);
+  o.fillStyle = '#1f9a4a'; for (const [x, y, q] of T.tips) { o.beginPath(); o.arc(x, y, 50, 0, TAU); o.fill(); } o.fillStyle = '#5fc45a'; for (const [x, y, q] of T.tips) { o.beginPath(); o.arc(x - 8, y - 10, 26, 0, TAU); o.fill(); }
+  g.save(); const gg = g; (function () { o.strokeStyle = '#6a3c1c'; o.lineCap = 'round'; for (const [x, y, x1, y1, w] of T.segs) { o.lineWidth = w; o.beginPath(); o.moveTo(x, y); o.lineTo(x1, y1); o.stroke(); } })(); g.restore();
+  // 2. cut it into panes: a jittered grid, each pane takes the colour under its centre, with its own brightness
+  const src = o.getImageData(0, 0, W, H).data, cs = 46, cols = Math.ceil(W / cs) + 1, rows = Math.ceil(H / cs) + 1, P = [];
+  for (let j = 0; j <= rows; j++) { P.push([]); for (let i = 0; i <= cols; i++) P[j].push([i * cs + (r() - 0.5) * cs * 0.55 - cs / 2, j * cs + (r() - 0.5) * cs * 0.55 - cs / 2]); }
+  G.fillStyle = '#0a0a0d'; G.fillRect(0, 0, W, H);
+  for (let j = 0; j < rows; j++) for (let i = 0; i < cols; i++) {
+    const q = [P[j][i], P[j][i + 1], P[j + 1][i + 1], P[j + 1][i]], cx = Math.max(0, Math.min(W - 1, (q[0][0] + q[2][0]) / 2 | 0)), cy = Math.max(0, Math.min(H - 1, (q[0][1] + q[2][1]) / 2 | 0)), k = (cy * W + cx) * 4, v = 0.78 + r() * 0.44;
+    const col = (m) => `rgb(${Math.min(255, src[k] * v * m) | 0},${Math.min(255, src[k + 1] * v * m) | 0},${Math.min(255, src[k + 2] * v * m) | 0})`, gr = G.createRadialGradient(cx - 6, cy - 6, 2, cx, cy, cs * 0.8); gr.addColorStop(0, col(1.25)); gr.addColorStop(1, col(0.8));
+    G.fillStyle = gr; G.beginPath(); G.moveTo(...q[0]); for (const p of q.slice(1)) G.lineTo(...p); G.closePath(); G.fill(); G.strokeStyle = '#0a0a0d'; G.lineWidth = 3.2; G.stroke();
+  }
+  // 3. the forms again in heavy lead, and the things that must stay whole
+  G.lineCap = 'round'; G.strokeStyle = '#0a0a0d'; for (const [x, y, x1, y1, w] of T.segs) { G.lineWidth = w + 7; G.beginPath(); G.moveTo(x, y); G.lineTo(x1, y1); G.stroke(); }
+  G.strokeStyle = '#8a5226'; for (const [x, y, x1, y1, w] of T.segs) { if (w < 5) continue; G.lineWidth = w - 1; G.beginPath(); G.moveTo(x, y); G.lineTo(x1, y1); G.stroke(); }
+  G.strokeStyle = '#0a0a0d'; G.lineWidth = 5; G.beginPath(); G.arc(300, 190, 74, 0, TAU); G.stroke();
+  for (const [base, amp, ph] of [[470, 50, 1], [540, 40, 3.2], [620, 20, 0.5]]) { G.beginPath(); for (let x = 0; x <= W; x += 8) G.lineTo(x, base - amp * Math.sin(x * 0.0045 + ph)); G.stroke(); }
+  G.lineWidth = 22; G.strokeStyle = '#0a0a0d'; G.beginPath(); for (let i = 0; i <= 50; i++) { const u = i / 50; G.lineTo(740 + Math.sin(u * 15) * (30 - 8 * u), 610 - u * 160); } G.stroke(); G.lineWidth = 12; G.strokeStyle = '#7a3fb0'; G.beginPath(); for (let i = 0; i <= 50; i++) { const u = i / 50; G.lineTo(740 + Math.sin(u * 15) * (30 - 8 * u), 610 - u * 160); } G.stroke();
+  const lead = (fn) => { g.save(); g.translate(0, 0); fn('#0a0a0d', 1); g.restore(); };
+  for (const [x, f, arm, hair, skin, wrap] of [[540, 1, 0.3, null, '#e0a878', '#f3ead0'], [930, -1, 2.2, 'long', '#edc09a', '#f3ead0']]) {
+    g.save(); g.shadowColor = '#0a0a0d'; g.shadowBlur = 0; for (const [dx, dy] of [[-4, 0], [4, 0], [0, -4], [0, 4], [-3, -3], [3, 3], [-3, 3], [3, -3]]) { g.save(); g.translate(dx, dy); human(x, 648, 190, { f, arm, hair }, '#0a0a0d'); g.restore(); } g.restore();
+    const hand = human(x, 648, 190, { f, arm, hair, wrap, top: f < 0, face: 1 }, skin, skin, f > 0 ? '#5a3418' : '#c8892a');
+    if (f < 0) { g.fillStyle = '#0a0a0d'; g.beginPath(); g.arc(hand[0] - 4, hand[1] - 14, 18, 0, TAU); g.fill(); g.fillStyle = '#e02a22'; g.beginPath(); g.arc(hand[0] - 4, hand[1] - 14, 13, 0, TAU); g.fill(); }
+  }
+  for (let i = 0; i < T.tips.length; i += 5) { const [x, y] = T.tips[i]; g.fillStyle = '#0a0a0d'; g.beginPath(); g.arc(x + 8, y + 24, 15, 0, TAU); g.fill(); g.fillStyle = '#e02a22'; g.beginPath(); g.arc(x + 8, y + 24, 10.5, 0, TAU); g.fill(); }
+  g.strokeStyle = '#0a0a0d'; g.lineWidth = 15; g.beginPath(); g.moveTo(40, 676); g.bezierCurveTo(300, 696, 520, 656, 740, 668); g.stroke(); g.strokeStyle = '#e02a22'; g.lineWidth = 8; g.beginPath(); g.moveTo(40, 676); g.bezierCurveTo(300, 696, 520, 656, 740, 668); g.stroke();
+  // 4. the window frame: a round arch of stone, a border of ruby and gold panes
+  g.save(); g.fillStyle = '#0a0a0d'; g.beginPath(); g.rect(0, 0, W, H); g.moveTo(40, H - 36); g.lineTo(40, 250); g.bezierCurveTo(40, -30, W - 40, -30, W - 40, 250); g.lineTo(W - 40, H - 36); g.closePath(); g.fill('evenodd'); g.restore();
+  g.strokeStyle = '#d9a21b'; g.lineWidth = 10; g.beginPath(); g.moveTo(40, H - 36); g.lineTo(40, 250); g.bezierCurveTo(40, -30, W - 40, -30, W - 40, 250); g.lineTo(W - 40, H - 36); g.closePath(); g.stroke();
+  g.strokeStyle = '#0a0a0d'; g.lineWidth = 3; g.stroke();
+  // 5. light through the glass: a soft bloom
+  const bl = document.createElement('canvas'); bl.width = W; bl.height = H; const bg = bl.getContext('2d'); bg.filter = 'blur(14px) brightness(1.1)'; bg.drawImage(c, 0, 0); g.save(); g.globalCompositeOperation = 'lighter'; g.globalAlpha = 0.38; g.drawImage(bl, 0, 0); g.restore();
+  g.font = '700 22px Cinzel'; g.textAlign = 'center'; g.fillStyle = '#f0dca0'; g.fillText('IN THE BEGINNING, A GARDEN', W / 2, H - 10);
+}
+document.fonts.load('700 24px Cinzel').then(() => document.fonts.load('34px Fell')).then(() => { ({ a: styleA, b: styleB, c: styleC })[style](); window.DONE = true; });
+</script></body></html>
