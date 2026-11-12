@@ -2,7 +2,7 @@
 
 Read this first in a new session, after loading the cinecode skill (Claude Code: the Skill tool, never a plain read of SKILL.md), then `python3 /home/user/sarpstar/cinecode/scripts/init_film.py . --update-tools` silently (the kit's newest tools). Kit: /home/user/sarpstar/cinecode · Method: `/home/user/sarpstar/cinecode/references/quick-mode.md`
 
-- **Phase:** 4 Draft
+- **Phase:** delivered
 - **Format source:** <none · saved format name (FORMAT.md)>
 - **Purpose:** cinematic (`/home/user/sarpstar/cinecode/references/purpose-<cinematic|ad>.md`)
 - **Idea:** the bible story from adam and eve up to king solomon (user)
@@ -25,7 +25,7 @@ Read this first in a new session, after loading the cinecode skill (Claude Code:
 - **Open notes:** <notes/round-N.md: the open items, or none>
 - **Revision round:** 0 of 2 <!-- a re-plan (new scenes or a new length) is shown as a new plan + one still per scene; it does not count as a round -->
 - **Re-plans:** <none · date: what changed, stills approved>
-- **Next action:** <one line>
+- **Next action:** none; final delivered. The three unused music candidates in LICENSES.csv were never used in the film.
 
 ## Log
 | Date | What | File |
