@@ -83,20 +83,26 @@ const SCENES = [
   { chapter: 'C1', from: CUES.c1, to: CUES.c2, draw: M(c1_eden), action: 'the red line grows into a tree; a hand takes the fruit; the garden loses its colour', amb: { kind: 'air', gain: 0.05 } },
   { chapter: 'C2', from: CUES.c2, to: CUES.c3, draw: M(c2_flood), action: 'the water rises over the world and lifts the ark; the line leaves it as a rainbow', in: { type: 'wipe', dur: 0.5 }, amb: { kind: 'water', gain: 0.07 } },
   { chapter: 'C3', from: CUES.c3, to: CUES.c4, draw: M(c3_babel), action: 'the tower builds brick by brick, breaks at the top and the line scatters into threads', in: { type: 'cut' }, amb: { kind: 'air', gain: 0.05 } },
-  { chapter: 'C4', from: CUES.c4, to: CUES.c5, draw: M(c4_abraham), action: 'one thread is followed; night falls and the stars come out one by one; a ladder rises', in: { type: 'whip', dur: 0.5 }, amb: { kind: 'air', gain: 0.04 } },
-  { chapter: 'C5', from: CUES.c5, to: CUES.c6, draw: M(c5_joseph), action: 'the coat is given, the boy is dropped into the pit, the line falls down the page into Egypt and the grain rises', in: { type: 'dissolve', dur: 0.6 }, amb: { kind: 'air', gain: 0.05 } },
+  { chapter: 'C4', from: CUES.c4, to: CUES.c4 + 10.6, draw: M(c4_abraham), action: 'one thread is followed; night falls and the stars come out one by one', in: { type: 'whip', dur: 0.5 }, amb: { kind: 'air', gain: 0.04 } },
+  { chapter: 'C4', from: CUES.c4 + 10.6, to: CUES.c5, draw: M(c4_abraham), action: 'a sleeper on a stone; a ladder rises into the sky', in: { type: 'cut' }, amb: { kind: 'air', gain: 0.04 } },
+  { chapter: 'C5', from: CUES.c5, to: CUES.c5 + 4.4, draw: M(c5_joseph), action: 'the coat is given and the boy is dropped into the pit', in: { type: 'dissolve', dur: 0.6 }, amb: { kind: 'air', gain: 0.05 } },
+  { chapter: 'C5', from: CUES.c5 + 4.4, to: CUES.c6, draw: M(c5_joseph), action: 'the line falls down the page into Egypt and the grain rises', in: { type: 'cut' }, amb: { kind: 'air', gain: 0.05 } },
   { chapter: 'C6', from: CUES.c6, to: CUES.sea, draw: M(c6_moses), action: 'bricks are stacked under the whip; a bush catches fire and does not burn; a man kneels', in: { type: 'cut' }, amb: { kind: 'air', gain: 0.05 } },
   { chapter: 'C6', from: CUES.sea, to: CUES.c7, draw: M(c6_sea), action: 'the sea splits into two walls and the people walk through', in: { type: 'cut' }, amb: { kind: 'water', gain: 0.07 } },
   { chapter: 'C7', from: CUES.c7, to: CUES.c8, draw: M(c7_sinai), action: 'the mountain smokes and the line climbs it; ten lines are cut into two tablets; the line coils forty times across the desert', in: { type: 'dissolve', dur: 0.6 }, amb: { kind: 'air', gain: 0.06 } },
-  { chapter: 'C8', from: CUES.c8, to: CUES.c9, draw: M(c8_land), action: 'seven horns sound and the wall of Jericho falls block by block; the line loops through the Judges; Ruth gleans', in: { type: 'whip', dur: 0.5 }, amb: { kind: 'air', gain: 0.05 } },
-  { chapter: 'C9', from: CUES.c9, to: CUES.c10, draw: M(c9_david), action: 'a sling stone crosses the valley and the giant falls; harp strings are strung and played; a crown comes down; a city fills its hill', in: { type: 'cut' }, amb: { kind: 'air', gain: 0.05 } },
-  { chapter: 'C10', from: CUES.c10, to: CUES.end, draw: M(c10_solomon), action: 'the Temple rises stone by stone, the line drops as a plumb line and settles, gold floods the stone, and the whole chart is seen', in: { type: 'dissolve', dur: 0.6 }, amb: { kind: 'room', gain: 0.05 } },
+  { chapter: 'C8', from: CUES.c8, to: CUES.c8 + 6.2, draw: M(c8_land), action: 'seven horns sound and the wall of Jericho falls block by block', in: { type: 'whip', dur: 0.5 }, amb: { kind: 'air', gain: 0.05 } },
+  { chapter: 'C8', from: CUES.c8 + 6.2, to: CUES.c8 + 11.4, draw: M(c8_land), action: 'the line loops and a judge rises in each turn', in: { type: 'cut' }, amb: { kind: 'air', gain: 0.05 } },
+  { chapter: 'C8', from: CUES.c8 + 11.4, to: CUES.c9, draw: M(c8_land), action: 'Ruth gleans in the harvest field', in: { type: 'cut' }, amb: { kind: 'air', gain: 0.05 } },
+  { chapter: 'C9', from: CUES.c9, to: CUES.c9 + 6.4, draw: M(c9_david), action: 'a sling stone crosses the valley and the giant falls', in: { type: 'cut' }, amb: { kind: 'air', gain: 0.05 } },
+  { chapter: 'C9', from: CUES.c9 + 6.4, to: CUES.c9 + 13.6, draw: M(c9_david), action: 'harp strings are strung and played; a crown comes down', in: { type: 'cut' }, amb: { kind: 'air', gain: 0.05 } },
+  { chapter: 'C9', from: CUES.c9 + 13.6, to: CUES.c10, draw: M(c9_david), action: 'a city fills its hill', in: { type: 'cut' }, amb: { kind: 'air', gain: 0.05 } },
+  { chapter: 'C10', from: CUES.c10, to: CUES.c10 + 12.4, draw: M(c10_solomon), action: 'the Temple rises stone by stone, the line drops as a plumb line and gold floods the stone', in: { type: 'dissolve', dur: 0.6 }, amb: { kind: 'room', gain: 0.05 } },
+  { chapter: 'C10', from: CUES.c10 + 12.4, to: CUES.end, draw: M(c10_solomon), action: 'the camera pulls back and every chapter stands on one horizon', in: { type: 'cut' }, amb: { kind: 'room', gain: 0.05 } },
 ];
 
 const SFX = [
   { at: 0.0, voice: 'foley', kind: 'cloth', gain: 0.35 },
   { at: 2.6, voice: 'tick', gain: 0.3 },
-  { at: 4.4, voice: 'air', dur: 2.4, gain: 0.12 },
   { at: 6.4, voice: 'foley', kind: 'tap', gain: 0.3 },
   { at: 9.0, voice: 'foley', kind: 'cloth', gain: 0.25 },
   { at: 10.5, voice: 'hit', wet: 0.5, gain: 0.45 },
@@ -147,7 +153,6 @@ const SFX = [
   { at: 84.1, voice: 'foley', kind: 'cloth', gain: 0.35 },
   { at: 85.6, voice: 'air', dur: 3.5, gain: 0.2 },
   { at: 86.4, voice: 'hit', wet: 0.6, gain: 0.3 },
-  { at: 90.6, voice: 'air', dur: 2, gain: 0.14 },
   { at: 92.6, voice: 'foley', kind: 'tap', gain: 0.35 },
   { at: 94.0, voice: 'hit', wet: 0.5, gain: 1.0 },
   { at: 94.05, voice: 'air', dur: 3.6, gain: 0.3 },
@@ -177,9 +182,7 @@ const SFX = [
   { at: 125.2, voice: 'tick', wet: 0.4, gain: 0.25 },
   { at: 126.3, voice: 'tick', wet: 0.4, gain: 0.25 },
   { at: 127.4, voice: 'tick', wet: 0.4, gain: 0.25 },
-  { at: 129.4, voice: 'air', dur: 3, gain: 0.12 },
   { at: 131.6, voice: 'foley', kind: 'cloth', gain: 0.2 },
-  { at: 135.6, voice: 'air', dur: 1.8, gain: 0.14 },
   { at: 137.6, voice: 'air', dur: 0.45, gain: 0.3 },
   { at: 138.05, voice: 'hit', gain: 0.6 },
   { at: 139.0, voice: 'hit', wet: 0.4, gain: 0.85 },
@@ -246,7 +249,7 @@ function wash(g, path, color, alpha = 0.55) {
   else if (color === PALETTE.green) { g.globalAlpha *= Math.min(1, alpha * 2.4); g.fillStyle = SIL; }
   else if (color === PALETTE.dim) { g.globalAlpha *= Math.min(1, alpha * 2); g.fillStyle = MOOD.mid; }
   else if (color === PALETTE.gold || color === PALETTE.accent) { g.globalAlpha *= alpha > 0.5 ? Math.min(1, alpha * 1.2) : alpha * 0.4; g.fillStyle = color; }
-  else { g.globalAlpha *= 0.94; g.fillStyle = '#101c30'; }
+  else { const a0 = g.globalAlpha; g.globalAlpha = a0 * 0.94; g.fillStyle = '#101c30'; g.fill(); g.globalAlpha = a0 * 0.5; g.fillStyle = MOOD.sky[2]; }
   g.fill(); g.restore();
 }
 // The sky behind every scene, in screen space: the chapter's gradient, its sun, long clouds that drift with the camera.
@@ -1002,7 +1005,7 @@ function c8_land(g, k, t, S) {
     for (let i = 0; i < 5; i++) { const u = A(ft, i * 0.12, 1.8); if (u > 0 && u < 1) { g.strokeStyle = PALETTE.ink; g.lineWidth = 0.002; g.globalAlpha = 1 - u; for (let j = 0; j < 4; j++) { g.beginPath(); g.arc(-0.45 + i * 0.22 + j * 0.03, GY - 0.03 - 0.12 * u, 0.03 + 0.09 * u, Math.PI * 1.1, Math.PI * 1.9); g.stroke(); } g.globalAlpha = 1; } }
     for (let i = 0; i < 7; i++) {                        // seven with horns, in front of the wall
       const px = -1.5 + i * 0.13 + 0.26 * Math.min(tl, 4.4), blow = EASE.inOut(A(tl, 3.5, 0.5)) * (1 - A(ft, 0.8, 0.8));
-      const hnd = person(g, px, GY + 0.07, 0.13, { face: 1, arm: 0.5 + 0.4 * blow, p: Math.min(tl, 4.4) * 1.5 + i * 0.3, salt: 310 + i, wash: i === 3 ? PALETTE.blue : null, washA: 0.4 });
+      const hnd = person(g, px, GY + 0.004, 0.15, { face: 1, arm: 0.5 + 0.4 * blow, p: Math.min(tl, 4.4) * 1.5 + i * 0.3, salt: 310 + i, wash: i === 3 ? PALETTE.blue : null, washA: 0.4 });
       stroke(g, [hnd, [hnd[0] + 0.035, hnd[1] - 0.02], [hnd[0] + 0.05, hnd[1] - 0.045]], 0.005, PALETTE.ink);
       if (blow > 0.5) { g.strokeStyle = PALETTE.ink; g.lineWidth = 0.0018; for (let j = 1; j <= 3; j++) { g.globalAlpha = 0.8 - j * 0.2; g.beginPath(); g.arc(hnd[0] + 0.05, hnd[1] - 0.045, 0.02 * j + 0.01 * Math.sin(t * 20), -1.3, 0.2); g.stroke(); } g.globalAlpha = 1; }
     }
@@ -1025,8 +1028,8 @@ function c8_land(g, k, t, S) {
     g.strokeStyle = PALETTE.ink; g.lineWidth = 0.002; g.lineCap = 'round';
     for (const [wx, wh, q, wd] of wheat()) { const sw = 0.012 * Math.sin(t * 1.6 + wx * 6); g.beginPath(); g.moveTo(wx, GY + wd * 0.3); g.quadraticCurveTo(wx + sw * 0.3, GY - wh * 0.5, wx + sw, GY - wh); g.stroke(); g.fillStyle = PALETTE.gold; g.beginPath(); g.ellipse(wx + sw, GY - wh - 0.008, 0.005, 0.014, sw * 8, 0, TAU); g.fill(); g.stroke(); }
     const bend = 0.5 + 0.5 * Math.sin(tl * 2.2);
-    person(g, 3.82 + 0.03 * tl * 0.2, GY + 0.05, 0.19, { face: 1, arm: 0.35 + 0.3 * bend, lean: 0.16 + 0.14 * bend, salt: 330, wash: PALETTE.blue, washA: 0.45 });
-    person(g, 4.48, GY + 0.03, 0.22, { face: -1, arm: 0.45, staff: true, salt: 331, wash: PALETTE.accent, washA: 0.35 });
+    person(g, 3.82 + 0.03 * tl * 0.2, GY + 0.004, 0.2, { face: 1, arm: 0.35 + 0.3 * bend, lean: 0.16 + 0.14 * bend, salt: 330, wash: PALETTE.blue, washA: 0.45 });
+    person(g, 4.48, GY + 0.004, 0.23, { face: -1, arm: 0.45, staff: true, salt: 331, wash: PALETTE.accent, washA: 0.35 });
     lineage(g, -2.4, lerp(-2.4, -0.62, run), GY);
     if (ft > 0.7) lineage(g, -0.62, lerp(-0.62, 0.7, EASE.inOut(A(ft, 0.7, 1.2))), GY);
     stroke(g, lp, 0.0065, PALETTE.accent, loopK);
