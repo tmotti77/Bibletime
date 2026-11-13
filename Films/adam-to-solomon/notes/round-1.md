@@ -6,3 +6,6 @@ The sunset-silhouette look (user picked it from three), the music "Call of the D
 
 ## After draft 3
 - User chose: "Render the final".
+
+## Round 2 (after the final)
+- "yes also i dont see isaac" (yes = commit the MP4, fonts and music to git; add Isaac).

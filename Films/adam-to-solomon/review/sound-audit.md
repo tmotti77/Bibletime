@@ -36,9 +36,12 @@ Music: recording, "The call of the desert" by zero-project (CC BY 3.0), picked b
 | 51.0 | stars | tick (code) | 1 + scene bed |
 | 51.8 | stars | tick (code) | 1 + scene bed |
 | 52.6 | stars | tick (code) | 1 + scene bed |
-| 55.6 | the camera leaves the tent | foley burst (code) | 1 + scene bed |
-| 57.6 | the ladder rises | riser (code) | 1 + scene bed |
-| 61.0 | messengers on the ladder | tick (code) | 1 + scene bed |
+| 53.2 | father and son go up Moriah | foley burst (code) | 1 + scene bed |
+| 54.6 | the hand is raised | foley burst (code) | 1 + scene bed |
+| 55.5 | the light stops the hand | layered hit (code) | 1 + scene bed |
+| 56.4 | the ram in the thicket | tick (code) | 1 + scene bed |
+| 59.0 | the ladder rises | riser (code) | 1 + scene bed |
+| 62.0 | messengers on the ladder | tick (code) | 1 + scene bed |
 | 65.0 | the coat | foley burst (code) | 1 + scene bed |
 | 67.9 | the boy drops into the pit | layered hit (code) | 1 + scene bed |
 | 69.0 | silver falls | tick (code) | 1 + scene bed |
@@ -115,4 +118,4 @@ Music: recording, "The call of the desert" by zero-project (CC BY 3.0), picked b
 | 175.2 | the title | layered hit (code) | 1 + scene bed |
 | 93.0 | the second before the sea splits | silence | by choice: the held breath before the key moment |
 
-events 110 · sounded 109 · silent by choice 1
+events 109 · sounded 108 · silent by choice 1

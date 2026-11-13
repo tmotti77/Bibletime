@@ -83,8 +83,9 @@ const SCENES = [
   { chapter: 'C1', from: CUES.c1, to: CUES.c2, draw: M(c1_eden), action: 'the red line grows into a tree; a hand takes the fruit; the garden loses its colour', amb: { kind: 'air', gain: 0.05 } },
   { chapter: 'C2', from: CUES.c2, to: CUES.c3, draw: M(c2_flood), action: 'the water rises over the world and lifts the ark; the line leaves it as a rainbow', in: { type: 'wipe', dur: 0.5 }, amb: { kind: 'water', gain: 0.07 } },
   { chapter: 'C3', from: CUES.c3, to: CUES.c4, draw: M(c3_babel), action: 'the tower builds brick by brick, breaks at the top and the line scatters into threads', in: { type: 'cut' }, amb: { kind: 'air', gain: 0.05 } },
-  { chapter: 'C4', from: CUES.c4, to: CUES.c4 + 10.6, draw: M(c4_abraham), action: 'one thread is followed; night falls and the stars come out one by one', in: { type: 'whip', dur: 0.5 }, amb: { kind: 'air', gain: 0.04 } },
-  { chapter: 'C4', from: CUES.c4 + 10.6, to: CUES.c5, draw: M(c4_abraham), action: 'a sleeper on a stone; a ladder rises into the sky', in: { type: 'cut' }, amb: { kind: 'air', gain: 0.04 } },
+  { chapter: 'C4', from: CUES.c4, to: CUES.c4 + 7.6, draw: M(c4_abraham), action: 'one thread is followed; night falls and the stars come out one by one', in: { type: 'whip', dur: 0.5 }, amb: { kind: 'air', gain: 0.04 } },
+  { chapter: 'C4', from: CUES.c4 + 7.6, to: CUES.c4 + 12.2, draw: M(c4_abraham), action: 'Abraham and Isaac on Moriah: the hand is raised, a light stops it, a ram is in the thicket', in: { type: 'cut' }, amb: { kind: 'air', gain: 0.04 } },
+  { chapter: 'C4', from: CUES.c4 + 12.2, to: CUES.c5, draw: M(c4_abraham), action: 'a sleeper on a stone; a ladder rises into the sky', in: { type: 'cut' }, amb: { kind: 'air', gain: 0.04 } },
   { chapter: 'C5', from: CUES.c5, to: CUES.c5 + 4.4, draw: M(c5_joseph), action: 'the coat is given and the boy is dropped into the pit', in: { type: 'dissolve', dur: 0.6 }, amb: { kind: 'air', gain: 0.05 } },
   { chapter: 'C5', from: CUES.c5 + 4.4, to: CUES.c6, draw: M(c5_joseph), action: 'the line falls down the page into Egypt and the grain rises', in: { type: 'cut' }, amb: { kind: 'air', gain: 0.05 } },
   { chapter: 'C6', from: CUES.c6, to: CUES.sea, draw: M(c6_moses), action: 'bricks are stacked under the whip; a bush catches fire and does not burn; a man kneels', in: { type: 'cut' }, amb: { kind: 'air', gain: 0.05 } },
@@ -132,9 +133,12 @@ const SFX = [
   { at: 51.0, voice: 'tick', wet: 0.7, gain: 0.18 },
   { at: 51.8, voice: 'tick', wet: 0.7, gain: 0.18 },
   { at: 52.6, voice: 'tick', wet: 0.7, gain: 0.18 },
-  { at: 55.6, voice: 'foley', kind: 'cloth', gain: 0.18 },
-  { at: 57.6, voice: 'riser', dur: 3.4, gain: 0.12 },
-  { at: 61.0, voice: 'tick', wet: 0.7, gain: 0.2 },
+  { at: 53.2, voice: 'foley', kind: 'step', gain: 0.2 },
+  { at: 54.6, voice: 'foley', kind: 'cloth', gain: 0.25 },
+  { at: 55.5, voice: 'hit', wet: 0.8, gain: 0.45 },
+  { at: 56.4, voice: 'tick', wet: 0.6, gain: 0.22 },
+  { at: 59.0, voice: 'riser', dur: 3, gain: 0.12 },
+  { at: 62.0, voice: 'tick', wet: 0.7, gain: 0.2 },
   { at: 65.0, voice: 'foley', kind: 'cloth', gain: 0.3 },
   { at: 67.9, voice: 'hit', wet: 0.3, gain: 0.5 },
   { at: 69.0, voice: 'tick', gain: 0.3 },
@@ -738,17 +742,18 @@ function c3_babel(g, k, t, S) {
 }
 
 // ------------------------------ C4 Abraham ------------------------------
-const abStars = lazy(() => { const r = rng(72); return Array.from({ length: 170 }, () => [-1.9 + r() * 5.6, -0.86 + r() * 0.98, 0.003 + r() * 0.006, r()]); });
+const abStars = lazy(() => { const r = rng(72); return Array.from({ length: 240 }, () => [-1.9 + r() * 7.8, -0.86 + r() * 0.98, 0.003 + r() * 0.006, r()]); });
 function c4_abraham(g, k, t, S) {
   // truck right with the walker 3 s ease-out; hold as night falls and the stars come, slow tilt up; truck right 3.2 s ease-in-out to the sleeper; crane up the ladder; truck out 2 s ease-in
-  const tl = t - CUES.c4, run = EASE.out(A(tl, 0, 3)), dusk = EASE.inOut(A(tl, 2.6, 3)) * (1 - EASE.inOut(A(tl, 15.4, 2.6))), to2 = EASE.inOut(A(tl, 9.4, 3.2)), lad = EASE.out(A(tl, 11.6, 3.6)), leave = EASE.in(A(tl, 16, 2));
-  const cam = CAM.base(); cam.x = lerp(-1.1, 0, run) + 1.95 * to2 + 1.1 * leave; cam.y = -0.1 * EASE.inOut(A(tl, 4, 4)) * (1 - to2) - 0.2 * EASE.inOut(A(tl, 12, 3)) * (1 - leave); cam.dist = 1 + 0.1 * EASE.inOut(A(tl, 4, 4)) * (1 - leave);
+  const tl = t - CUES.c4, run = EASE.out(A(tl, 0, 3)), dusk = EASE.inOut(A(tl, 2.6, 3)) * (1 - EASE.inOut(A(tl, 15.4, 2.6))), to2 = EASE.inOut(A(tl, 7, 2)), toB = EASE.inOut(A(tl, 11.4, 2)), lad = EASE.out(A(tl, 13, 3)), leave = EASE.in(A(tl, 16.2, 1.8));
+  const mh = (x) => GY - 0.17 * Math.exp(-(((x - 1.7) / 0.32) ** 2)) + 0.008 * Math.sin(x * 6);   // Moriah
+  const cam = CAM.base(); cam.x = lerp(-1.1, 0, run) + 1.7 * to2 + 1.8 * toB + 1.1 * leave; cam.y = -0.1 * EASE.inOut(A(tl, 4, 3)) * (1 - to2) - 0.06 * to2 * (1 - toB) - 0.2 * EASE.inOut(A(tl, 13.2, 2.6)) * (1 - leave); cam.dist = 1 + 0.1 * EASE.inOut(A(tl, 4, 4)) * (1 - leave);
   chartPaper(g, S, cam, 4);
   plane(g, S, cam, 0.28, (g) => {
-    land(g, (x) => 0.18 - 0.05 * Math.sin(x * 1.7 + 1) - 0.02 * Math.sin(x * 4.3), -2.4, 4.6, 0.6, { ang: 0.1, gap: 0.012, salt: 73, wash: PALETTE.gold, washA: 0.3 });
-    night(g, -2.4, -1.1, 7, 1.75, dusk);
+    land(g, (x) => 0.18 - 0.05 * Math.sin(x * 1.7 + 1) - 0.02 * Math.sin(x * 4.3), -2.4, 6.8, 0.6, { ang: 0.1, gap: 0.012, salt: 73, wash: PALETTE.gold, washA: 0.3 });
+    night(g, -2.4, -1.1, 9.4, 1.75, dusk);
     for (const [i, [sx, sy, sr, q]] of abStars().entries()) {        // the stars come one at a time, as if counted
-      const sk = MOTION.back(A(tl, 4.2 + i * 0.03, 0.35)) * dusk;
+      const sk = MOTION.back(A(tl, 4.2 + i * 0.014, 0.35)) * dusk;
       if (sk <= 0) continue;
       const tw = 0.75 + 0.25 * Math.sin(t * 3 + q * 40), r = sr * 1.7 * sk * tw;
       g.fillStyle = STARLIGHT; g.globalAlpha = 1; g.beginPath(); g.arc(sx, sy, Math.max(0, r), 0, TAU); g.fill();
@@ -756,7 +761,7 @@ function c4_abraham(g, k, t, S) {
     }
   });
   plane(g, S, cam, 0, (g) => {
-    land(g, (x) => GY + 0.008 * Math.sin(x * 6), -2.6, 4.8, 0.7, { ang: 0.42, gap: 0.013, salt: 74, wash: PALETTE.gold, washA: 0.3 });
+    land(g, mh, -2.6, 7, 0.7, { ang: 0.42, gap: 0.013, salt: 74, wash: PALETTE.gold, washA: 0.3 });
     for (let i = 0; i < 15; i++) {                       // the many threads, grey now, thinning out behind him
       const y0 = -0.35 + i * 0.06, pts = []; for (let j = 0; j <= 30; j++) { const x = -2.6 + j * 0.065; pts.push([x, y0 + 0.03 * Math.sin(x * (3 + i % 4) + i) + (0.24 - y0) * 0.12 * (j / 30)]); }
       stroke(g, pts, 0.003, PALETTE.dim, 1, 0.65 * (1 - dusk));
@@ -775,10 +780,23 @@ function c4_abraham(g, k, t, S) {
     glow(g, 0.62, GY - 0.02, 0.22 * fl, 0.6 * dusk);
     stroke(g, [[0.6, GY], [0.61, GY - 0.03 * fl], [0.62, GY - 0.012], [0.63, GY - 0.04 * fl], [0.645, GY]], 0.003, PALETTE.accent);
     // Abram: he walks in with the line, stops, and looks up
-    const ax = lerp(-1.75, -0.25, run);
-    person(g, ax, GY, 0.21, { face: 1, arm: 0.2 + 0.7 * EASE.inOut(A(tl, 4.4, 1.3)), staff: tl < 4.2, p: run * 7, salt: 76, wash: PALETTE.blue, washA: 0.4 });
+    const ax = lerp(-1.75, -0.25, run) + 0.9 * EASE.in(A(tl, 6.6, 1.6));
+    person(g, ax, GY, 0.21, { face: 1, arm: 0.2 + 0.7 * EASE.inOut(A(tl, 4.4, 1.3)), staff: tl < 4.2 || tl > 6.6, p: run * 7 + A(tl, 6.6, 1.6) * 4, salt: 76, wash: PALETTE.blue, washA: 0.4 });
+    // Moriah: the father and the son go up; the hand is raised, a light stops it, a ram is caught in the thicket
+    {
+      const top = mh(1.7), call = EASE.out(A(tl, 9.5, 0.8)), raise = EASE.inOut(A(tl, 8.5, 0.9)) * (1 - EASE.inOut(A(tl, 9.7, 0.9)));
+      if (call > 0) { g.save(); const lg = g.createLinearGradient(0, -0.9, 0, top); lg.addColorStop(0, 'rgba(255,236,170,0)'); lg.addColorStop(1, `rgba(255,236,170,${0.55 * call})`); g.fillStyle = lg; g.beginPath(); g.moveTo(1.62, -0.9); g.lineTo(1.5, top); g.lineTo(1.9, top); g.lineTo(1.78, -0.9); g.fill(); g.restore(); glow(g, 1.7, top - 0.08, 0.3 * call, 0.6); }
+      for (let r = 0; r < 3; r++) for (let c = 0; c < 3 - (r > 1 ? 1 : 0); c++) block(g, 1.64 + c * 0.045 + (r > 1 ? 0.022 : 0), top - 0.03 * (r + 1) + 0.006, 0.045, 0.03, 760 + r * 3 + c);
+      for (let i = 0; i < 4; i++) stroke(g, [[1.63 + i * 0.012, top - 0.1 - i * 0.004], [1.79 - i * 0.01, top - 0.098 - i * 0.005]], 0.006, SIL);     // the wood
+      const kh = person(g, 1.53, mh(1.53) + 0.004, 0.22, { face: 1, arm: 0.25 + 0.7 * raise, salt: 76 });
+      if (raise > 0.1) stroke(g, [kh, [kh[0] + 0.012, kh[1] - 0.05]], 0.006, STARLIGHT, 1, raise);                                                   // the knife catches the light
+      person(g, 1.86, mh(1.86) + 0.004, 0.13, { face: -1, arm: 0.1, legs: true, salt: 77 });                                                         // Isaac
+      const rk = EASE.out(A(tl, 9.9, 0.9));
+      for (let i = 0; i < 9; i++) { const a = -Math.PI * (0.1 + 0.8 * i / 8); stroke(g, [[2.1, mh(2.1)], [2.1 + Math.cos(a) * 0.05, mh(2.1) + Math.sin(a) * 0.07], [2.1 + Math.cos(a + 0.4) * 0.085, mh(2.1) + Math.sin(a + 0.4) * 0.1]], 0.004, SIL); }
+      if (rk > 0) { glow(g, 2.03, mh(2.03) - 0.04, 0.12 * rk, 0.5); g.globalAlpha = rk; animal(g, 2.0, mh(2.0) + 0.004, 0.05, 1, 0.1 * Math.sin(tl * 5), 1); g.globalAlpha = 1; }
+    }
     // Bethel: a sleeper on a stone, and a ladder that goes all the way up
-    const bx = 1.95;
+    const bx = 3.5;
     block(g, bx - 0.13, GY - 0.03, 0.07, 0.03, 77);
     const sl = (g) => { g.moveTo(bx - 0.07, GY); g.quadraticCurveTo(bx + 0.05, GY - 0.075, bx + 0.2, GY - 0.03); g.lineTo(bx + 0.24, GY); g.closePath(); };
     g.fillStyle = SIL; g.beginPath(); sl(g); g.fill(); wash(g, sl, PALETTE.green, 0.4); hatch(g, sl, { ang: 0.3, gap: 0.009, w: 0.0014, alpha: 0.8, box: [bx - 0.1, GY - 0.08, bx + 0.25, GY], salt: 78 });
@@ -796,14 +814,16 @@ function c4_abraham(g, k, t, S) {
         stroke(g, [[mx - 0.03, my - 0.012 + wf], [mx, my], [mx + 0.03, my - 0.012 + wf]], 0.0035, STARLIGHT); g.fillStyle = STARLIGHT; g.beginPath(); g.arc(mx, my - 0.012, 0.006, 0, TAU); g.fill();
       }
     }
-    night(g, -2.6, GY - 0.012, 7.4, 0.6, dusk * 0.55, 79);
-    const head = tl < 9.4 ? lerp(-2, -0.18, run) : lerp(-0.18, 1.8, to2) + 2.6 * leave;
+    night(g, -2.6, GY - 0.012, 9.8, 0.6, dusk * 0.55, 79);
+    const head = tl < 7 ? lerp(-2, -0.18, run) : lerp(-0.18, 1.3, to2) + 2.05 * toB + 2.6 * leave;
     lineage(g, -2.6, head, GY); if (head < 4.3) nib(g, head, GY);
   });
   const ink = dusk > 0.5 ? STARLIGHT : PALETTE.ink;
-  card(g, S, 'Count the stars, if you can.', t, CUES.c4 + 5.4, CUES.c4 + 10, -0.425, 0.058, { color: STARLIGHT });
-  place(g, S, 'CANAAN  ·  GENESIS 15', t, CUES.c4 + 1, CUES.c4 + 9.4, 0.45, ink);
-  place(g, S, 'BETHEL  ·  GENESIS 28', t, CUES.c4 + 11.6, CUES.c4 + 17.2, 0.45, ink);
+  card(g, S, 'Count the stars, if you can.', t, CUES.c4 + 4.4, CUES.c4 + 8, -0.425, 0.058, { color: STARLIGHT });
+  card(g, S, 'A son was given, and given back.', t, CUES.c4 + 8.6, CUES.c4 + 12.2);
+  place(g, S, 'CANAAN  ·  GENESIS 15', t, CUES.c4 + 1, CUES.c4 + 7.2, 0.45, ink);
+  place(g, S, 'MORIAH  ·  ABRAHAM AND ISAAC  ·  GENESIS 22', t, CUES.c4 + 8, CUES.c4 + 11.6, 0.45, ink);
+  place(g, S, 'BETHEL  ·  JACOB  ·  GENESIS 28', t, CUES.c4 + 13, CUES.c4 + 17.4, 0.45, ink);
 }
 
 // A soft glow of light on the page (a fire, a lamp of gold): laid as paint, not as a wash.
@@ -1205,7 +1225,7 @@ function c10_solomon(g, k, t, S) {
     if (back > 0.02) {
       text(g, S, 'THE TEMPLE', 0, GY + 0.62, 0.16, STARLIGHT, clamp(back * 2), 0.06, { weight: 700 });
       text(g, S, 'FROM A GARDEN TO A TEMPLE', -3.675, -2.1, 0.42, SIL, 1, 0.08, { weight: 700, reveal: A(tl, 17.2, 2), by: 'word', spread: 0.7 });
-      text(g, S, 'ADAM  ·  NOAH  ·  ABRAHAM  ·  JOSEPH  ·  MOSES  ·  JOSHUA  ·  DAVID  ·  SOLOMON', -3.675, 1.22, 0.15, STARLIGHT, EASE.out(A(tl, 19.4, 1.4)) * 0.85, 0.08, { weight: 400 });
+      text(g, S, 'ADAM  ·  NOAH  ·  ABRAHAM  ·  ISAAC  ·  JACOB  ·  JOSEPH  ·  MOSES  ·  JOSHUA  ·  DAVID  ·  SOLOMON', -3.675, 1.22, 0.125, STARLIGHT, EASE.out(A(tl, 19.4, 1.4)) * 0.85, 0.08, { weight: 400 });
     }
   });
   place(g, S, 'JERUSALEM  ·  1 KINGS 6', t, CUES.c10 + 1, CUES.c10 + 11.6);
