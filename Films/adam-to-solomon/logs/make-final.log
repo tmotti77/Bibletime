@@ -14,3 +14,197 @@ $ node /home/user/Bibletime/Films/adam-to-solomon/tools/capture.mjs --url film.h
 [capture] deterministic: yes
 
 $ node /home/user/Bibletime/Films/adam-to-solomon/tools/capture.mjs --url film.html --video /home/user/Bibletime/Films/adam-to-solomon/renders/picture-v2.mp4 --audio /home/user/Bibletime/Films/adam-to-solomon/audio/film.wav --workers 3 --format jpeg --quality 0.95 --maxrate 10M --params w=1920&h=1080 --status /home/user/Bibletime/Films/adam-to-solomon/renders/final.status.json
+[capture] renderer: canvas2d
+[capture] qc: text: cap height 31 px < 40 px for phone viewing at 1920x1080
+[capture] page: 1920x1080, 4320 frames @ 24 fps
+[capture] audio: /home/user/Bibletime/Films/adam-to-solomon/audio/film.wav (180.000 s, 48000 Hz, 2 ch, 32-bit float, peak -0.3 dBFS, 23.5 s)
+[capture] 75/4320 frames (0 skipped) - 2.5 fps
+[capture] 150/4320 frames (0 skipped) - 4.3 fps
+[capture] 228/4320 frames (0 skipped) - 5.7 fps
+[capture] 298/4320 frames (0 skipped) - 6.7 fps
+[capture] 359/4320 frames (0 skipped) - 7.2 fps
+[capture] 420/4320 frames (0 skipped) - 7.7 fps
+[capture] 489/4320 frames (0 skipped) - 8.2 fps
+[capture] 558/4320 frames (0 skipped) - 8.6 fps
+[capture] 623/4320 frames (0 skipped) - 8.9 fps
+[capture] 692/4320 frames (0 skipped) - 9.3 fps
+[capture] 762/4320 frames (0 skipped) - 9.6 fps
+[capture] 822/4320 frames (0 skipped) - 9.7 fps
+[capture] 888/4320 frames (0 skipped) - 9.9 fps
+[capture] 963/4320 frames (0 skipped) - 10.2 fps
+[capture] 1034/4320 frames (0 skipped) - 10.4 fps
+[capture] 1086/4320 frames (0 skipped) - 10.4 fps
+[capture] 1151/4320 frames (0 skipped) - 10.5 fps
+[capture] 1219/4320 frames (0 skipped) - 10.6 fps
+[capture] 1296/4320 frames (0 skipped) - 10.8 fps
+[capture] 1379/4320 frames (0 skipped) - 11.1 fps
+[capture] 1463/4320 frames (0 skipped) - 11.3 fps
+[capture] 1538/4320 frames (0 skipped) - 11.4 fps
+[capture] 1598/4320 frames (0 skipped) - 11.4 fps
+[capture] 1664/4320 frames (0 skipped) - 11.5 fps
+[capture] 1739/4320 frames (0 skipped) - 11.6 fps
+[capture] 1811/4320 frames (0 skipped) - 11.7 fps
+[capture] 1884/4320 frames (0 skipped) - 11.8 fps
+[capture] 1961/4320 frames (0 skipped) - 11.9 fps
+[capture] 2029/4320 frames (0 skipped) - 11.9 fps
+[capture] 2104/4320 frames (0 skipped) - 12.0 fps
+[capture] 2174/4320 frames (0 skipped) - 12.1 fps
+[capture] 2240/4320 frames (0 skipped) - 12.1 fps
+[capture] 2306/4320 frames (0 skipped) - 12.1 fps
+[capture] 2373/4320 frames (0 skipped) - 12.2 fps
+[capture] 2438/4320 frames (0 skipped) - 12.2 fps
+[capture] 2510/4320 frames (0 skipped) - 12.3 fps
+[capture] 2587/4320 frames (0 skipped) - 12.3 fps
+[capture] 2657/4320 frames (0 skipped) - 12.4 fps
+[capture] 2736/4320 frames (0 skipped) - 12.4 fps
+[capture] 2805/4320 frames (0 skipped) - 12.5 fps
+[capture] 2877/4320 frames (0 skipped) - 12.5 fps
+[capture] 2945/4320 frames (0 skipped) - 12.5 fps
+[capture] 3021/4320 frames (0 skipped) - 12.6 fps
+[capture] 3090/4320 frames (0 skipped) - 12.6 fps
+[capture] 3158/4320 frames (0 skipped) - 12.6 fps
+[capture] 3218/4320 frames (0 skipped) - 12.6 fps
+[capture] 3289/4320 frames (0 skipped) - 12.7 fps
+[capture] 3364/4320 frames (0 skipped) - 12.7 fps
+[capture] 3440/4320 frames (0 skipped) - 12.7 fps
+[capture] 3515/4320 frames (0 skipped) - 12.8 fps
+[capture] 3596/4320 frames (0 skipped) - 12.9 fps
+[capture] 3670/4320 frames (0 skipped) - 12.9 fps
+[capture] 3746/4320 frames (0 skipped) - 12.9 fps
+[capture] 3817/4320 frames (0 skipped) - 12.9 fps
+[capture] 3892/4320 frames (0 skipped) - 13.0 fps
+[capture] 3969/4320 frames (0 skipped) - 13.0 fps
+[capture] 4043/4320 frames (0 skipped) - 13.0 fps
+[capture] 4114/4320 frames (0 skipped) - 13.1 fps
+[capture] 4174/4320 frames (0 skipped) - 13.1 fps
+[capture] 4241/4320 frames (0 skipped) - 13.1 fps
+[capture] 4317/4320 frames (0 skipped) - 13.1 fps
+[capture] done: 4320 rendered, 0 skipped, 332.4 s total, 13.00 fps, 3 worker(s)
+[capture] video: /home/user/Bibletime/Films/adam-to-solomon/renders/picture-v2.mp4 (4320 frames @ 24 fps, no audio yet)
+
+$ /usr/local/bin/python3 /home/user/Bibletime/Films/adam-to-solomon/tools/master_audio.py /home/user/Bibletime/Films/adam-to-solomon/audio/film.wav /home/user/Bibletime/Films/adam-to-solomon/renders/film-v2.mp4 --video /home/user/Bibletime/Films/adam-to-solomon/renders/picture-v2.mp4 --limit
+pass 1: I=-15.18 LUFS  TP=-0.29 dBTP  LRA=5.50 LU  thresh=-25.31
+limit: +1.18 dB then a lookahead limiter at -3.5 dBFS -> I=-14.24 LUFS  TP=-3.50 dBTP  LRA=5.10 LU
+pass 2: normalization_type=linear  output I=-13.93  TP=-3.26  LRA=4.90
+re-measured from /home/user/Bibletime/Films/adam-to-solomon/renders/film-v2.mp4: I=-13.9 LUFS  LRA=4.9 LU  true peak=-2.2 dBFS
+OK
+
+$ /usr/local/bin/python3 /home/user/Bibletime/Films/adam-to-solomon/tools/qc.py all /home/user/Bibletime/Films/adam-to-solomon/renders/film-v2.mp4 0,16,32,46,53.6,58.2,64,68.4,80,90,102,118,124.2,129.4,134,140.4,147.6,156,168.4,180
+== info: /home/user/Bibletime/Films/adam-to-solomon/renders/film-v2.mp4
+duration=180.000000
+size=78563111
+bit_rate=3491693
+codec_name=h264
+profile=High
+width=1920
+height=1080
+pix_fmt=yuv420p
+color_range=tv
+color_space=bt709
+color_transfer=bt709
+color_primaries=bt709
+r_frame_rate=24/1
+frames=4320
+audio_codec_name=aac
+audio_sample_rate=48000
+audio_channels=2
+audio_bit_rate=312009
+== hook (first 2 s must move from frame 1; min mean 0.5, motion >= 0.02 in every 2 frames):
+  steps=47 mean=0.63 min=0.208 first_step=1.733
+  PASS
+  (also look at the strip: qc.py strip <video> 0 2 12, so grain or flicker is not mistaken for motion)
+== sheet: /home/user/Bibletime/Films/adam-to-solomon/review/qc-film-v2/sheet.jpg (index: /home/user/Bibletime/Films/adam-to-solomon/review/qc-film-v2/sheet-index.txt, one tile every 10s)
+== black intervals (>= 0.1 s, 98% of pixels dark):
+none
+== frozen intervals (>= 1.5 s):
+lavfi.freezedetect.freeze_start: 6.95833
+lavfi.freezedetect.freeze_duration: 1.5
+lavfi.freezedetect.freeze_end: 8.45833
+lavfi.freezedetect.freeze_start: 152.833
+lavfi.freezedetect.freeze_duration: 1.79167
+lavfi.freezedetect.freeze_end: 154.625
+(grain hides freezes from this detector; also check strips and duplicates)
+== exact duplicate consecutive frames:
+frames: 4320, duplicates: 0
+== one-frame pops (a frame unlike both neighbours, 48 px grey): 0
+== repeated compositions (the same picture again, 6 s or more later; 32 px grey): 4 repeats, 4 s of 180
+     00:28.00-00:29.00 repeats 00:22.00-00:23.00
+     00:58.00-00:59.00 repeats 00:51.00-00:52.00
+     01:52.00-01:53.00 repeats 01:43.00-01:44.00
+     02:59.00-03:00.00 repeats 02:53.00-02:54.00
+  each repeat is a new picture (another angle, scale, place or moment) unless the card names it a callback
+== brightness (4 samples/s):
+samples: 720, mean L*: 17.6, min: 0.5, max: 37.5, very dark (L*<12): 31.9%
+== hard cuts (scene score > 0.3):
+cuts: 4
+  00:17.917
+  00:22.625
+  00:24.417
+  01:20.000
+== action per scene (camera move removed; flag when the median residual < 1.0 or < 30% of the total; 4 samples/s):
+     #1 00:00.00-00:16.00  residual  2.02  total  2.15  ok
+     #2 00:16.00-00:32.00  residual  1.53  total  2.47  ok
+     #3 00:32.00-00:46.00  residual  3.10  total  3.23  ok
+     #4 00:46.00-00:53.60  residual  1.20  total  1.70  ok
+     #5 00:53.60-00:58.20  residual  1.07  total  1.68  ok
+     #6 00:58.20-01:04.00  residual  2.81  total  4.25  ok
+     #7 01:04.00-01:08.40  residual  1.38  total  1.38  ok
+     #8 01:08.40-01:20.00  residual  3.06  total  7.50  ok
+     #9 01:20.00-01:30.00  residual  1.82  total  2.60  ok
+    #10 01:30.00-01:42.00  residual  0.61  total  0.61  CHECK: nothing moves
+    #11 01:42.00-01:58.00  residual  1.17  total  1.21  ok
+    #12 01:58.00-02:04.20  residual  0.24  total  0.24  CHECK: nothing moves
+    #13 02:04.20-02:09.40  residual  1.53  total  1.59  ok
+    #14 02:09.40-02:14.00  residual  0.75  total  0.94  CHECK: nothing moves
+    #15 02:14.00-02:20.40  residual  0.59  total  0.60  CHECK: nothing moves
+    #16 02:20.40-02:27.60  residual  0.31  total  0.31  CHECK: nothing moves
+    #17 02:27.60-02:36.00  residual  0.97  total  1.01  CHECK: camera-led, the subject barely acts
+    #18 02:36.00-02:48.40  residual  4.14  total  4.61  ok
+    #19 02:48.40-03:00.00  residual  0.62  total  0.63  CHECK: nothing moves
+  7 scene(s) flagged; look at their strips (qc.py strip) and give each an action
+== loudness (EBU R128, true peak):
+      I:         -13.9 LUFS
+      Threshold: -24.0 LUFS
+      LRA:         4.9 LU
+      Threshold: -34.0 LUFS
+      Peak:       -2.2 dBFS
+== silences (< -50 dB, >= 0.5 s):
+  none
+targets for web: I = -14 LUFS (+/-1), true peak <= -1 dBTP; every silence must be scripted
+== sound per scene (median -13.9 LUFS, harsh-band median -19.9 dB; flag > 3.0 LU or > 3.0 dB above):
+     #1 00:00.00-00:16.00   -16.6 LUFS  harsh -18.1 dB  ok
+     #2 00:16.00-00:32.00   -16.0 LUFS  harsh -17.8 dB  ok
+     #3 00:32.00-00:46.00   -15.5 LUFS  harsh -17.8 dB  ok
+     #4 00:46.00-00:53.60   -15.5 LUFS  harsh -17.3 dB  ok
+     #5 00:53.60-00:58.20   -15.6 LUFS  harsh -20.5 dB  ok
+     #6 00:58.20-01:04.00   -13.9 LUFS  harsh -18.6 dB  ok
+     #7 01:04.00-01:08.40   -13.6 LUFS  harsh -19.2 dB  ok
+     #8 01:08.40-01:20.00   -13.4 LUFS  harsh -20.2 dB  ok
+     #9 01:20.00-01:30.00   -12.8 LUFS  harsh -18.9 dB  ok
+    #10 01:30.00-01:42.00   -11.7 LUFS  harsh -18.4 dB  ok
+    #11 01:42.00-01:58.00   -11.8 LUFS  harsh -18.2 dB  ok
+    #12 01:58.00-02:04.20   -13.3 LUFS  harsh -20.9 dB  ok
+    #13 02:04.20-02:09.40   -13.4 LUFS  harsh -20.5 dB  ok
+    #14 02:09.40-02:14.00   -13.3 LUFS  harsh -20.9 dB  ok
+    #15 02:14.00-02:20.40   -13.1 LUFS  harsh -20.8 dB  ok
+    #16 02:20.40-02:27.60   -15.6 LUFS  harsh -20.1 dB  ok
+    #17 02:27.60-02:36.00   -17.0 LUFS  harsh -20.3 dB  QUIETER by 3.1 LU
+    #18 02:36.00-02:48.40   -14.1 LUFS  harsh -21.1 dB  ok
+    #19 02:48.40-03:00.00   -14.4 LUFS  harsh -19.9 dB  ok
+  1 scene(s) flagged; listen to those seconds, then fix the level or soften the lead
+== spectrogram: /home/user/Bibletime/Films/adam-to-solomon/review/qc-film-v2/spectrogram.png (look for persistent horizontal lines = pitched layers)
+== report: /home/user/Bibletime/Films/adam-to-solomon/review/qc-film-v2/report.txt
+
+$ ffprobe -v error -select_streams v:0 -show_entries stream=width,height -of csv=s=x:p=0 /home/user/Bibletime/Films/adam-to-solomon/review/qc-film-v2/sheet.jpg
+1948x556
+
+$ ffmpeg -hide_banner -nostdin -loglevel error -y -i /home/user/Bibletime/Films/adam-to-solomon/review/qc-film-v2/sheet.jpg -vf scale=1024:-2 -q:v 4 -update 1 /home/user/Bibletime/Films/adam-to-solomon/review/qc-film-v2/sheet-small.jpg
+
+$ /usr/local/bin/python3 /home/user/Bibletime/Films/adam-to-solomon/tools/qc.py thumb /home/user/Bibletime/Films/adam-to-solomon/renders/film-v2.mp4 768 126
+== thumb: /home/user/Bibletime/Films/adam-to-solomon/review/qc-film-v2/thumb-film-v2-126s-768.jpg (768x432)
+
+$ node /home/user/Bibletime/Films/adam-to-solomon/tools/capture.mjs --url film.html --text-check 0.5 --params w=1920&h=1080&shutter=0&weave=0&tone=0&textcheck=1
+[capture] renderer: canvas2d
+[capture] qc: text: cap height 31 px < 40 px for phone viewing at 1920x1080
+[capture] page: 1920x1080, 4320 frames @ 24 fps
+[capture] text check: no overlapping lines, no line lost in its ground
