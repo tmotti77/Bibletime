@@ -25,7 +25,7 @@ Read this first in a new session, after loading the cinecode skill (Claude Code:
 - **Open notes:** <notes/round-N.md: the open items, or none>
 - **Revision round:** 0 of 2 <!-- a re-plan (new scenes or a new length) is shown as a new plan + one still per scene; it does not count as a round -->
 - **Re-plans:** <none · date: what changed, stills approved>
-- **Next action:** none; final delivered. The three unused music candidates in LICENSES.csv were never used in the film.
+- **Next action:** the drawn film is delivered (with the Isaac scene). Next: a realistic version with Veo through Flow in the user's browser; read VEO-SHOTLIST.md first. Start with test shots 1B and 6D and show them before generating the rest.
 
 ## Log
 | Date | What | File |
