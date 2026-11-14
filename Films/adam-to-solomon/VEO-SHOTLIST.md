@@ -144,7 +144,7 @@ No caption. The title FROM A GARDEN TO A TEMPLE comes at 2:53 over 10C.
 | 10B | 2:43 | 5.4 s | `The finished temple at sunrise. Its doors open and the interior blazes with gold: gold-covered walls, lampstands, light pouring out through the doorway between two bronze pillars. A king in royal robes stands on the steps with his arms lifted. Slow push in toward the door.` |
 | 10C | 2:48.4 | 11.6 s | `Very wide aerial shot pulling slowly back and up from a gleaming white and gold temple on a hill above ancient Jerusalem at sunrise, the whole land stretching away beyond it: hills, desert, a distant sea. Huge sun on the horizon, long shadows, birds crossing. (Generate 8 s and extend it once, or slow the last seconds in the edit.)` |
 
-Total: 29 shots.
+Total: 31 shots.
 
 ---
 
